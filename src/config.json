@@ -1,0 +1,37 @@
+{
+  "clients": {
+    "Geth": {
+      "homepage": "http://ethereum.github.io/go-ethereum/",
+      "version": "1.4.11",
+      "releaseNotes": "https://github.com/ethereum/go-ethereum/releases/tag/v1.4.11",
+      "cli": {
+        "commands": {
+          "sanityCheck": {
+            "args": "version",
+            "output": [ "Geth", "Version: 1.4.11" ]
+          }
+        },                  
+        "platforms": {
+          "linux": {
+            "x64": {
+              "url": "https://github.com/ethereum/go-ethereum/releases/download/v1.4.11/geth-Linux64-20160819135300-1.4.11-fed692f.tar.bz2",
+              "bin": "geth"
+            }
+          },
+          "mac": {
+            "x64": {
+              "url": "https://github.com/ethereum/go-ethereum/releases/download/v1.4.11/geth-OSX-20160818153612-1.4.11-fed692f.zip",
+              "bin": "geth"
+            }
+          },
+          "win": {
+            "x64": {
+              "url": "https://github.com/ethereum/go-ethereum/releases/download/v1.4.11/Geth-Win64-20160818153642-1.4.11-fed692f.zip",
+              "bin": "geth.exe"
+            }
+          }
+        }
+      }
+    }
+  }
+}
