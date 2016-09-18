@@ -3,11 +3,11 @@
     "Geth": {
       "homepage": "http://ethereum.github.io/go-ethereum/",
       "version": "1.4.11",
-      "releaseNotes": "https://github.com/ethereum/go-ethereum/releases/tag/v1.4.11",
+      "versionNotes": "https://github.com/ethereum/go-ethereum/releases/tag/v1.4.11",
       "cli": {
         "commands": {
           "sanityCheck": {
-            "args": "version",
+            "args": ["version"],
             "output": [ "Geth", "Version: 1.4.11" ]
           }
         },                  

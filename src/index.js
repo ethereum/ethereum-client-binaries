@@ -1,6 +1,12 @@
 "use strict";
 
-const got = require('got');
+const got = require('got'),
+  spawn = require('buffered-spawn');
+  
+const _ = {
+  isEmpty: require('lodash.isempty'),
+  get: require('lodash.get'),
+};
   
 
 const DUMMY_LOGGER = {
@@ -41,10 +47,39 @@ class Manager {
       ;
     }
   }
+  
+  
+  /**
+   * Get info on available clients.
+   *
+   * This will return an array of items, each one having the structure:
+   *
+   * {
+   *  id: "client name"
+   *  homepage: "client homepage url"
+   *  version: "client version"
+   *  cli: {
+   *    "url": "download url",
+   *    "bin": "name of binary",
+   *    "fullPath": "full path to binary" (only if found)
+   *  },
+   *  status: {
+        "available": true OR false (depending on status)
+        "failReason": why it is not available (`sanityCheckFail`, `notFound`, etc)
+   *  }
+   * }
+   * 
+   * @return {Array}
+   */
+  get clients () {
+    return this._clients;
+  }
 
   
   /**
    * Initialise the manager.
+   *
+   * Upon completion `this.clients` will have all the info you need.
    *
    * @return {Promise}
    */
@@ -52,21 +87,167 @@ class Manager {
     this._logger.info('Initializing...');
     
     return Promise.resolve()
-      .then(() => this._scan());
+    .then(() => this._resolvePlatform())
+    .then(() => this._scan())
+  }
+
+
+  _resolvePlatform () {
+    this._logger.info('Resolving platform...');
+    
+    return Promise.resolve()
+    .then(() => {
+      // platform
+      switch (process.platform) {
+        case 'win32':
+          this._os = 'win';
+          break;
+        case 'darwin':
+          this._os = 'mac';
+          break;
+        case default:
+          this._os = process.platform;
+      }          
+      
+      // architecture
+      this._arch = process.arch;
+    });
   }
   
   
   /**
    * Scan the local machine for client software, as defined in the configuration.
    *
-   * Upon completion `this._state` will be set.
+   * Upon completion `this._clients` will be set.
    *
    * @return {Promise}
    */
   _scan () {
-    
+    this._clients = [];
+
+    return this._calculatePossibleClients()
+    .then((clients) => {
+      this._clients = clients;
+      
+      this._logger.info(`${this._clients.length} possible clients.`);          
+
+      if (_.isEmpty(this._clients.length)) {
+        return;
+      }
+      
+      return this._verifyClientStatus(this._clients);
+    });
   }
   
+  
+  /**
+   * @return {Object}
+   */
+  _calculatePossibleClients () {
+    // get possible clients
+    this._logger.info('Calculating possible clients...');
+    
+    const possibleClients = {};
+    
+    for (let clientName in _.get(this._config, 'clients', {}) {
+      let client = this._config[clientName];
+      
+      if (_.get(client, `cli.platforms.${this._os}.${this._arch}`)) {
+        possibleClients[clientName] = Object.assign({}, client, {
+          id: clientName,
+          activeCli: client.cli.platforms[this._os][this._arch]
+        };
+      }
+    }
+    
+    return possibleClients;
+  }
+  
+  
+  /**
+   * This will modify the items in the passed-in array according to check results.
+   * 
+   * @return {Promise}
+   */
+  _verifyClientStatus (clients) {
+    const clientObjects = Object.values(clients);
+    
+    return Promise.all(clientObjects, ((client) => {
+      this._logger.info(`Checking ${client.id} availability...`);
+      
+      const binName = client.activeCli.bin;
+      
+      this._logger.debug(`${client.id} binary name: ${binName}`);
+      
+      return this._spawn('command', ['-v', binName]) 
+      .catch((err) => {
+        this._logger.error(`Unable to resolve ${client.id} executable: ${binName}`);
+        
+        client.state = {
+          failReason: 'notFound',
+        };
+        
+        throw err;
+      });
+      .then((output) => output.stdout)
+      .then((fullPath) => {
+        this._logger.debug(`${client.id} binary path: ${fullPath}`);
+        
+        client.activeCli.fullPath = fullPath;
+                
+        const sanityCheck = _.get(this._config[client.id], 'cli.commands.sanityCheck');
+        
+        if (!sanityCheck) {
+          this._logger.debug(`No sanity check set for ${client.id}, so skipping.`);
+          
+          return;
+        }
+        
+        return this._spawn(client.cli.fullPath, sanityCheck.args)
+        .then((output) => {
+          const haystack = output.stdout + output.stderr;
+          
+          const needles = sanityCheck.output || [];
+          
+          for (let needle of needles) {
+            if (0 > haystack.indexOf(needle)) {
+              throw new Error(`Unable to find "${needle}" in ${client.id} output`);
+            }
+          }
+        })
+        .catch((err) => {
+          this._logger.error(`Sanity check failed for ${client.id}`);
+          
+          client.state = {
+            failReason: 'sanityCheckFail',
+          };
+          
+          throw err;
+        });
+      })
+      .then(() => {
+        client.status = {
+          available: true,
+        };
+      })
+      .catch((err) => {
+        client.state = {
+          available: false,
+        };
+      })
+    }));
+  }
+  
+  /**
+   * @return {Promise} Resolves to { stdout, stderr } object
+   */
+  _spawn(cmd, args) {
+    args = args = [];
+    
+    this._logger.debug(`Exec: ${cmd} ${args.join(' ')}`);
+    
+    return spawn(cmd, args);
+  }
 }
 
 
