@@ -1,0 +1,26 @@
+{
+  "name": "ethereum-clients",
+  "version": "1.0.0",
+  "description": "Download and manage Ethereum client software installed locally",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hiddentao/ethereum-clients.git"
+  },
+  "keywords": [
+    "ethereum",
+    "blockchain",
+    "client",
+    "geth",
+    "parity",
+    "ethereumj",
+    "ethereumjs",
+    "pyethereum"
+  ],
+  "author": "Ramesh Nair <ram@hiddentao.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hiddentao/ethereum-clients/issues"
+  },
+  "homepage": "https://github.com/hiddentao/ethereum-clients#readme"
+}
