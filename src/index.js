@@ -52,17 +52,17 @@ class Manager {
   /**
    * Get info on available clients.
    *
-   * This will return an array of items, each one having the structure:
+   * This will return an array, each item having the structure:
    *
    * {
    *  id: "client name"
    *  homepage: "client homepage url"
    *  version: "client version"
-   *  cli: {
-   *    "url": "download url",
-   *    "bin": "name of binary",
-   *    "fullPath": "full path to binary" (only if found)
-   *  },
+   *  versionNotes: "client version notes url"
+   *  cli: {... info on all available platforms...},
+   *  activeCli: {
+   *    ...info for this platform...
+   *  }
    *  status: {
         "available": true OR false (depending on status)
         "failReason": why it is not available (`sanityCheckFail`, `notFound`, etc)
@@ -131,7 +131,7 @@ class Manager {
       
       this._logger.info(`${this._clients.length} possible clients.`);          
 
-      if (_.isEmpty(this._clients.length)) {
+      if (!this._clients.length) {
         return;
       }
       
@@ -153,10 +153,10 @@ class Manager {
       let client = this._config[clientName];
       
       if (_.get(client, `cli.platforms.${this._os}.${this._arch}`)) {
-        possibleClients[clientName] = Object.assign({}, client, {
+        possibleClients.push(Object.assign({}, client, {
           id: clientName,
           activeCli: client.cli.platforms[this._os][this._arch]
-        };
+        });
       }
     }
     
@@ -170,9 +170,7 @@ class Manager {
    * @return {Promise}
    */
   _verifyClientStatus (clients) {
-    const clientObjects = Object.values(clients);
-    
-    return Promise.all(clientObjects, ((client) => {
+    return Promise.all(clients, ((client) => {
       this._logger.info(`Checking ${client.id} availability...`);
       
       const binName = client.activeCli.bin;
