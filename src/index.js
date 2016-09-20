@@ -86,8 +86,9 @@ class Manager {
 
   
   /**
-   * Initialise the manager.
-   *
+   * Initialize the manager.
+   * 
+   * This will scan for clients.
    * Upon completion `this.clients` will have all the info you need.
    *
    * @return {Promise}
@@ -99,6 +100,60 @@ class Manager {
     
     return this._scan();
   }
+  
+  
+  /**
+   * Download a particular client.
+   *
+   * If client has config this platform and is not  available then 
+   * it will be downloaded from the download URL.
+   * 
+   * If client doesn't have config for current platform then this will thrown an 
+   * error. If has config and has been found on this platform then 
+   * this will do nothing and return immediately.
+   *
+   * @return {Promise} This object will also emit `progress` events indicating 
+   * download and unzip progress.
+   */
+  download (clientId) {
+    this._logger.info(`Download binary for client ${clientId}...`);
+    
+    return Promise.resolve()
+    .then(() => {
+      let client = (this._config || []).filter((c) => {
+        return (c.id === clientId);
+      });
+      
+      client = _.get(client, '0');
+      
+      // not for this machine?
+      if (!client) {
+        throw new Error(`Client ${clientId} missing configuration for this platform.`);
+      }
+      
+      // already available?
+      if (_.get(client, 'state.available')) {
+        return;
+      }
+      
+      // active cli
+      const cfg = _.get(client, `activeCli`);
+      
+      if (!cfg.url) {
+        throw new Error(`No download URL available for client ${clientId}`);
+      }
+      
+      let promise = new Promise();
+
+      this._logger.info(`Downloading binary from ${cfg.url}...`);
+
+      got.stream(cfg.url);
+      // TODO
+      
+      return promise;
+    });
+  }
+  
 
   
   _resolvePlatform () {
