@@ -186,7 +186,7 @@ class Manager {
             
       return this._spawn('command', ['-v', binName]) 
       .then((output) => {
-        const fullPath = output.stdout;
+        const fullPath = _.get(output, 'stdout', '').trim();
         
         if (!_.get(fullPath, 'length')) {
           throw new Error(`Command not found: ${binName}`);
@@ -208,7 +208,7 @@ class Manager {
         
         client.activeCli.fullPath = fullPath;
 
-        this._logger.debug(`Checking for ${client.id} sanity check...`);
+        this._logger.info(`Checking for ${client.id} sanity check...`);
                 
         const sanityCheck = _.get(this._config.clients[client.id], 'cli.commands.sanityCheck');
         
@@ -218,9 +218,13 @@ class Manager {
           return;
         }
         
-        return this._spawn(client.cli.fullPath, sanityCheck.args)
+        this._logger.info(`Checking sanity for ${client.id}...`)
+        
+        return this._spawn(client.activeCli.fullPath, sanityCheck.args)
         .then((output) => {
           const haystack = output.stdout + output.stderr;
+          
+          this._logger.debug(`Sanity check output: ${haystack}`);
           
           const needles = sanityCheck.output || [];
           
@@ -231,7 +235,7 @@ class Manager {
           }
         })
         .catch((err) => {
-          this._logger.error(`Sanity check failed for ${client.id}`);
+          this._logger.error(`Sanity check failed for ${client.id}`, err);
           
           client.state = {
             failReason: 'sanityCheckFail',
@@ -257,7 +261,7 @@ class Manager {
   _spawn(cmd, args) {
     args = args || [];
     
-    this._logger.debug(`Exec: ${cmd} ${args.join(' ')}`);
+    this._logger.debug(`Exec: "${cmd} ${args.join(' ')}"`);
     
     return spawn(cmd, args);
   }

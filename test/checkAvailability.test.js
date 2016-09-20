@@ -160,3 +160,41 @@ test['sanity check failed'] = function*() {
 };
 
 
+test['sanity check passed'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    "url": "http://badgerbadgerbadger.com",
+    "bin": "maga"    
+  });
+  
+  let mgr = new this.Manager({
+    clients: {
+      "Maga": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "cli": {
+          "commands": {
+            "sanityCheck": {
+              "args": ['test'],
+              "output": [ "boom:test" ]
+            }
+          },                  
+          "platforms": platforms,
+        }
+      }
+    }
+  });
+  
+  // mgr.logger = console;
+  yield mgr.init();
+  
+  mgr.clients.length.should.eql(1);
+  
+  const client = mgr.clients.pop();
+  
+  client.state.available.should.be.true;
+};
+
+
+
