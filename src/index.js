@@ -207,8 +207,10 @@ class Manager {
         this._logger.debug(`${client.id} binary path: ${fullPath}`);
         
         client.activeCli.fullPath = fullPath;
+
+        this._logger.debug(`Checking for ${client.id} sanity check...`);
                 
-        const sanityCheck = _.get(this._config[client.id], 'cli.commands.sanityCheck');
+        const sanityCheck = _.get(this._config.clients[client.id], 'cli.commands.sanityCheck');
         
         if (!sanityCheck) {
           this._logger.debug(`No sanity check set for ${client.id}, so skipping.`);
@@ -253,7 +255,7 @@ class Manager {
    * @return {Promise} Resolves to { stdout, stderr } object
    */
   _spawn(cmd, args) {
-    args = args = [];
+    args = args || [];
     
     this._logger.debug(`Exec: ${cmd} ${args.join(' ')}`);
     

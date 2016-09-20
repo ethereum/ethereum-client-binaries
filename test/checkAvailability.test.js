@@ -125,7 +125,7 @@ test['unable to resolve binary'] = function*() {
 test['sanity check failed'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "invalid"    
+    "bin": "maga"    
   });
   
   let mgr = new this.Manager({
@@ -156,7 +156,7 @@ test['sanity check failed'] = function*() {
   const client = mgr.clients.pop();
   
   client.state.available.should.be.false;
-  client.state.failReason.should.eql('notFound');
+  client.state.failReason.should.eql('sanityCheckFail');
 };
 
 
