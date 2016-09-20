@@ -31,7 +31,9 @@
     "buffered-spawn": "^3.3.2",
     "got": "^6.5.0",
     "lodash.get": "^4.4.2",
-    "lodash.isempty": "^4.4.0"
+    "lodash.isempty": "^4.4.0",
+    "progress-stream": "^1.2.0",
+    "tmp": "0.0.29"
   },
   "devDepencencies": {
     "bluebird": "^3.4.6",

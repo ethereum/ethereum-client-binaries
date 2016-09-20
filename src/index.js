@@ -1,6 +1,10 @@
 "use strict";
 
 const got = require('got'),
+  path = require('path'),
+  tmp = require('tmp'),
+  // EventEmitter = require('events'),
+  // progress = require('progress-stream'),
   spawn = require('buffered-spawn');
   
 const _ = {
@@ -105,52 +109,125 @@ class Manager {
   /**
    * Download a particular client.
    *
-   * If client has config this platform and is not  available then 
-   * it will be downloaded from the download URL.
+   * If client has config this platform then 
+   * it will be downloaded from the download URL, whether is already available 
+   * on the system or not.
    * 
    * If client doesn't have config for current platform then this will thrown an 
-   * error. If has config and has been found on this platform then 
-   * this will do nothing and return immediately.
+   * error.
    *
-   * @return {Promise} This object will also emit `progress` events indicating 
-   * download and unzip progress.
+   * @param {Object} [options] Options.
+   * @param {Object} [options.downloadFolder] Folder to download client to, and to unzip it in.
+   *
+   * @return {Promise} 
    */
-  download (clientId) {
-    this._logger.info(`Download binary for client ${clientId}...`);
+  download (clientId, options) {
+    options = Object.assign({
+      downloadFolder: null,
+    }, options);
     
+    this._logger.info(`Download binary for client ${clientId} ...`);
+
+    let client = (this._config || []).filter((c) => {
+      return (c.id === clientId);
+    });
+    
+    client = _.get(client, '0');
+
+    const activeCli = _.get(client, `activeCli`),
+      downloadCfg = _.get(activeCli, `download`);
+
     return Promise.resolve()
     .then(() => {
-      let client = (this._config || []).filter((c) => {
-        return (c.id === clientId);
-      });
-      
-      client = _.get(client, '0');
-      
       // not for this machine?
       if (!client) {
         throw new Error(`Client ${clientId} missing configuration for this platform.`);
       }
-      
-      // already available?
-      if (_.get(client, 'state.available')) {
-        return;
+
+      if (!_.get(downloadCfg, 'url') || !_.get(downloadCfg, 'type')) {
+        throw new Error(`Download info not available for client ${clientId}`);
       }
       
-      // active cli
-      const cfg = _.get(client, `activeCli`);
+      let resolve, reject;
+      const promise = new Promise((_resolve, _reject) => {
+        resolve = _resolve;
+        reject = _reject;
+      });
       
-      if (!cfg.url) {
-        throw new Error(`No download URL available for client ${clientId}`);
-      }
+      const downloadFolder = path.join(
+        options.downloadFolder || path.join(tmp.dirSync(), clientId),
+        clientId
+      );
+        
+      this._logger.debug(`Downloading to folder ${downloadFolder} ...`);
       
-      let promise = new Promise();
+      const downloadFile = path.join(downloadFolder, `download.${downloadCfg.type}`);
 
-      this._logger.info(`Downloading binary from ${cfg.url}...`);
+      this._logger.info(`Downloading package from ${downloadCfg.url} to ${downloadFile} ...`);
 
-      got.stream(cfg.url);
-      // TODO
+      const writeStream = fs.createWriteStream(downloadFile);
+      
+      const stream = got.stream(cfg.url);
+      
+      // stream.pipe(progress({
+      //   time: 100
+      // }));
+      
+      stream.pipe(writeStream);
+      
+      // stream.on('progress', (info) => );
+      
+      stream.on('error', (err) => {
+        this._logger.error(`Error downloading package for client ${clientId}`, err);
+        
+        reject(err);
+      })
+      
+      stream.on('end', () => {        
+        this._logger.debug(`Downloaded ${downloadCfg.url} to ${downloadFile}`);
+
+        resolve({
+          downloadFolder: downloadFolder,
+          downloadFile: downloadFile,
+        });        
+      });
       
       return promise;
+    })
+    .then((dInfo) => {
+      const downloadFolder = dInfo.downloadFolder,
+        downloadFile = dInfo.downloadFile;
+      
+      const unzipFolder = path.join(downloadFolder, 'unzipped');
+      
+      this._logger.debug(`Unzipping ${downloadFile} to ${unzipFolder} ...`);
+
+      let promise;
+      
+      switch (downloadCfg.type) {
+        case 'zip':
+          promise = this._spawn('unzip', ['-o', downloadFile, '-d', unzipFolder]);
+          break;
+        case 'tar':
+          promise = this._spawn('tar', ['-xf', downloadFile, '-C', unzipFolder]);
+          break;
+        default:
+          throw new Error(`Unsupported zip type: ${downloadCfg.type}`);
+      }
+      
+      return promise.then(() => {
+        this._logger.debug(`Unzipped ${downloadFile} to ${unzipFolder}`);
+        
+        return {
+          downloadFolder: downloadFolder,
+          downloadFile: downloadFile,        
+          unzipFolder: unzipFolder,  
+        };
+      });
+    })
+    .then((info) => {
+      // check for binary
+      
     });
   }
   
@@ -261,45 +338,15 @@ class Manager {
         this._logger.error(`Unable to resolve ${client.id} executable: ${binName}`);
         
         client.state = {
+          available: false,
           failReason: 'notFound',
         };
         
         throw err;
       })
       .then((fullPath) => {
-        this._logger.debug(`${client.id} binary path: ${fullPath}`);
-        
-        client.activeCli.fullPath = fullPath;
-
-        this._logger.info(`Checking for ${client.id} sanity check...`);
-                
-        const sanityCheck = _.get(this._config.clients[client.id], 'cli.commands.sanityCheck');
-        
-        if (!sanityCheck) {
-          this._logger.debug(`No sanity check set for ${client.id}, so skipping.`);
-          
-          return;
-        }
-        
-        this._logger.info(`Checking sanity for ${client.id}...`)
-        
-        return this._spawn(client.activeCli.fullPath, sanityCheck.args)
-        .then((output) => {
-          const haystack = output.stdout + output.stderr;
-          
-          this._logger.debug(`Sanity check output: ${haystack}`);
-          
-          const needles = sanityCheck.output || [];
-          
-          for (let needle of needles) {
-            if (0 > haystack.indexOf(needle)) {
-              throw new Error(`Unable to find "${needle}" in ${client.id} output`);
-            }
-          }
-        })
+        return this._runSanityCheck(client, fullPath)
         .catch((err) => {
-          this._logger.error(`Sanity check failed for ${client.id}`, err);
-          
           client.state = {
             failReason: 'sanityCheckFail',
           };
@@ -317,6 +364,52 @@ class Manager {
       })
     }));
   }
+  
+  
+  /**
+   * Run sanity check for client.
+   
+   * @param {Object} client Client config info.
+   * @param {String} binPath Path to binary (to sanity-check).
+   */
+  _runSanityCheck (client, binPath) {
+    this._logger.debug(`${client.id} binary path: ${fullPath}`);
+    
+    client.activeCli.fullPath = fullPath;
+
+    this._logger.info(`Checking for ${client.id} sanity check...`);
+            
+    const sanityCheck = _.get(client, 'cli.commands.sanityCheck');
+    
+    if (!sanityCheck) {
+      this._logger.debug(`No sanity check set for ${client.id}, so skipping.`);
+      
+      return;
+    }
+    
+    this._logger.info(`Checking sanity for ${client.id}...`)
+    
+    return this._spawn(client.activeCli.fullPath, sanityCheck.args)
+    .then((output) => {
+      const haystack = output.stdout + output.stderr;
+      
+      this._logger.debug(`Sanity check output: ${haystack}`);
+      
+      const needles = sanityCheck.output || [];
+      
+      for (let needle of needles) {
+        if (0 > haystack.indexOf(needle)) {
+          throw new Error(`Unable to find "${needle}" in ${client.id} output`);
+        }
+      }
+    })
+    .catch((err) => {
+      this._logger.error(`Sanity check failed for ${client.id}`, err);
+            
+      throw err;
+    });    
+  }
+  
   
   /**
    * @return {Promise} Resolves to { stdout, stderr } object
