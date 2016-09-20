@@ -29,6 +29,7 @@ class Manager {
    */
   constructor (config) {
     this._config = config || DefaultConfig;
+    
     this._logger = DUMMY_LOGGER;
   }
   
@@ -105,7 +106,7 @@ class Manager {
         case 'darwin':
           this._os = 'mac';
           break;
-        case default:
+        default:
           this._os = process.platform;
       }          
       
@@ -149,14 +150,16 @@ class Manager {
     
     const possibleClients = {};
     
-    for (let clientName in _.get(this._config, 'clients', {}) {
+    for (let clientName in _.get(this._config, 'clients', {})) {
       let client = this._config[clientName];
       
       if (_.get(client, `cli.platforms.${this._os}.${this._arch}`)) {
-        possibleClients.push(Object.assign({}, client, {
-          id: clientName,
-          activeCli: client.cli.platforms[this._os][this._arch]
-        });
+        possibleClients.push(
+          Object.assign({}, client, {
+            id: clientName,
+            activeCli: client.cli.platforms[this._os][this._arch]
+          })
+        );
       }
     }
     
@@ -186,7 +189,7 @@ class Manager {
         };
         
         throw err;
-      });
+      })
       .then((output) => output.stdout)
       .then((fullPath) => {
         this._logger.debug(`${client.id} binary path: ${fullPath}`);

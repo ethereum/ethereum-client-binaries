@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Download and manage Ethereum client software installed locally",
   "main": "src/index.js",
+  "scripts": {
+    "test": "mocha --timeout 180000 --ui exports --reporter spec test/*.test.js",
+    "test-coverage": "istanbul cover _mocha -- --timeout 180000 --ui exports --reporter spec test/*.test.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hiddentao/ethereum-clients.git"
@@ -28,5 +32,27 @@
     "got": "^6.5.0",
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0"
+  },
+  "devDepencencies": {
+    "bluebird": "^3.4.6",
+    "chai": "^3.5.0",
+    "co-mocha": "^1.1.3",
+    "genomatic": "^1.0.0",
+    "istanbul": "^0.4.5",
+    "lodash.frompairs": "^4.0.1",
+    "mocha": "^3.0.2",
+    "sinon": "^1.17.5",
+    "sinon-chai": "^2.8.0"
+  },
+  "devDependencies": {
+    "bluebird": "^3.4.6",
+    "chai": "^3.5.0",
+    "co-mocha": "^1.1.3",
+    "genomatic": "^1.0.0",
+    "istanbul": "^0.4.5",
+    "lodash.frompairs": "^4.0.1",
+    "mocha": "^3.0.2",
+    "sinon": "^1.17.6",
+    "sinon-chai": "^2.8.0"
   }
 }
