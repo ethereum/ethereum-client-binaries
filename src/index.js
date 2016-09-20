@@ -87,32 +87,31 @@ class Manager {
   init() {
     this._logger.info('Initializing...');
     
-    return Promise.resolve()
-    .then(() => this._resolvePlatform())
-    .then(() => this._scan())
+    this._resolvePlatform();
+    
+    return this._scan();
   }
 
-
+  
   _resolvePlatform () {
     this._logger.info('Resolving platform...');
+
+    // platform
+    switch (process.platform) {
+      case 'win32':
+        this._os = 'win';
+        break;
+      case 'darwin':
+        this._os = 'mac';
+        break;
+      default:
+        this._os = process.platform;
+    }          
     
-    return Promise.resolve()
-    .then(() => {
-      // platform
-      switch (process.platform) {
-        case 'win32':
-          this._os = 'win';
-          break;
-        case 'darwin':
-          this._os = 'mac';
-          break;
-        default:
-          this._os = process.platform;
-      }          
-      
-      // architecture
-      this._arch = process.arch;
-    });
+    // architecture
+    this._arch = process.arch;
+    
+    return Promise.resolve();
   }
   
   
@@ -142,28 +141,31 @@ class Manager {
   
   
   /**
-   * @return {Object}
+   * @return {Promise}
    */
   _calculatePossibleClients () {
-    // get possible clients
-    this._logger.info('Calculating possible clients...');
-    
-    const possibleClients = {};
-    
-    for (let clientName in _.get(this._config, 'clients', {})) {
-      let client = this._config[clientName];
+    return Promise.resolve()
+    .then(() => {
+      // get possible clients
+      this._logger.info('Calculating possible clients...');
       
-      if (_.get(client, `cli.platforms.${this._os}.${this._arch}`)) {
-        possibleClients.push(
-          Object.assign({}, client, {
-            id: clientName,
-            activeCli: client.cli.platforms[this._os][this._arch]
-          })
-        );
+      const possibleClients = [];
+      
+      for (let clientName in _.get(this._config, 'clients', {})) {
+        let client = this._config.clients[clientName];
+        
+        if (_.get(client, `cli.platforms.${this._os}.${this._arch}`)) {
+          possibleClients.push(
+            Object.assign({}, client, {
+              id: clientName,
+              activeCli: client.cli.platforms[this._os][this._arch]
+            })
+          );
+        }
       }
-    }
-    
-    return possibleClients;
+      
+      return possibleClients;      
+    });
   }
   
   
@@ -173,14 +175,25 @@ class Manager {
    * @return {Promise}
    */
   _verifyClientStatus (clients) {
-    return Promise.all(clients, ((client) => {
+    this._logger.info(`Verifying status of all ${clients.length} possible clients...`);
+    
+    return Promise.all(clients.map((client) => {
       this._logger.info(`Checking ${client.id} availability...`);
       
       const binName = client.activeCli.bin;
       
       this._logger.debug(`${client.id} binary name: ${binName}`);
-      
+            
       return this._spawn('command', ['-v', binName]) 
+      .then((output) => {
+        const fullPath = output.stdout;
+        
+        if (!_.get(fullPath, 'length')) {
+          throw new Error(`Command not found: ${binName}`);
+        }
+        
+        return fullPath;
+      })
       .catch((err) => {
         this._logger.error(`Unable to resolve ${client.id} executable: ${binName}`);
         
@@ -190,7 +203,6 @@ class Manager {
         
         throw err;
       })
-      .then((output) => output.stdout)
       .then((fullPath) => {
         this._logger.debug(`${client.id} binary path: ${fullPath}`);
         
@@ -227,14 +239,12 @@ class Manager {
         });
       })
       .then(() => {
-        client.status = {
-          available: true,
-        };
+        client.state = client.state || {};
+        client.state.available = true;
       })
       .catch((err) => {
-        client.state = {
-          available: false,
-        };
+        client.state = client.state || {};
+        client.state.available = false;
       })
     }));
   }

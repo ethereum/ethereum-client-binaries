@@ -4,14 +4,14 @@ const test = require('./_base')(module);
 
 
 test.before = function*() {
-  this.clients = new this.Manager();
+  this.mgr = new this.Manager();
 };
 
 
 test['nothing by default'] = function*() {
   let spy = this.mocker.spy(console, 'info');
 
-  this.clients._logger.info('test');
+  this.mgr._logger.info('test');
   
   spy.should.not.have.been.called;
 };
@@ -20,17 +20,17 @@ test['nothing by default'] = function*() {
 test['turn on and off'] = function*() {
   let spy = this.mocker.spy(console, 'info');
   
-  this.clients.logger = {
+  this.mgr.logger = {
     info: spy,
   };
-  this.clients._logger.info('test logging');
+  this.mgr._logger.info('test logging');
   
   const callCount = spy.callCount;
   callCount.should.eql(1);
   
-  this.clients.logger = null;
+  this.mgr.logger = null;
 
-  this.clients._logger.info('test logging');
+  this.mgr._logger.info('test logging');
   
   spy.callCount.should.eql(callCount);
 };
@@ -40,9 +40,9 @@ test['turn on and off'] = function*() {
 test['must be valid logger'] = function*() {
   let spy = this.mocker.spy();
   
-  this.clients.logger = 'blah';
+  this.mgr.logger = 'blah';
   
-  this.clients._logger.info('test');
+  this.mgr._logger.info('test');
 
   spy.should.not.have.been.called;
 };

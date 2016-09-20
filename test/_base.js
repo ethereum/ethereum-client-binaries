@@ -24,7 +24,20 @@ const EthereumClients = require('../src');
 
 
 module.exports = function(_module) {
-  const tools = {};
+  const tools = {
+    buildPlatformConfig: function(platform, arch, cfg) {
+      if (platform === 'darwin') {
+        platform = 'mac';
+      } else if (platform === 'win32') {
+        platform = 'win';
+      }
+      
+      const p = {};
+      p[`${platform}`] = {};
+      p[`${platform}`][`${arch}`] = cfg;
+      return p;
+    }
+  };
 
   const test = {
     before: function*() {
@@ -38,6 +51,10 @@ module.exports = function(_module) {
       for (let k in tools) {
         this[k] = genomatic.bind(tools[k], this);
       }
+      
+      // test help
+      console.debug = console.log.bind(console);
+      process.env.PATH += `:${path.join(__dirname, 'bin')}`;
     },
     beforeEach: function*() {
       this.mocker = sinon.sandbox.create();      
