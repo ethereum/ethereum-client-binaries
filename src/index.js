@@ -33,6 +33,14 @@ class Manager {
     this._logger = DUMMY_LOGGER;
   }
   
+  /**
+   * Get configuration.
+   * @return {Object}
+   */
+  get config () {
+    return this._config;
+  }
+  
   
   /**
    * Set the logger.

@@ -1,5 +1,7 @@
 "use strict";
 
+const path = require('path');
+
 const test = require('./_base')(module);
 
 
@@ -194,6 +196,54 @@ test['sanity check passed'] = function*() {
   const client = mgr.clients.pop();
   
   client.state.available.should.be.true;
+};
+
+
+
+test['client config returned'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    "url": "http://badgerbadgerbadger.com",
+    "bin": "maga"    
+  });
+  
+  const config = {
+    clients: {
+      "Maga": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "cli": {
+          "commands": {
+            "sanityCheck": {
+              "args": ['test'],
+              "output": [ "boom:test" ]
+            }
+          },                  
+          "platforms": platforms,
+        }
+      }
+    }
+  };
+  
+  let mgr = new this.Manager(config);
+  
+  // mgr.logger = console;
+  yield mgr.init();
+  
+  const client = mgr.clients.pop();
+  
+  client.should.eql(Object.assign({}, config.clients.Maga, {
+    id: 'Maga',
+    state: {
+      available: true,
+    },
+    activeCli: {
+      url: 'http://badgerbadgerbadger.com',
+      bin: 'maga',
+      fullPath: path.join(__dirname, 'bin', 'maga'),
+    }
+  }));
 };
 
 
