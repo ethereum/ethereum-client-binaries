@@ -275,15 +275,15 @@ test['download fails'] = function*() {
 test['unsupported archive type'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     download: {
-      url: `${this.archiveTestHost}/maga.zip`,
+      url: `${this.archiveTestHost}/maga2-good.zip`,
       type: 'blah'
     },
-    "bin": "maga"    
+    "bin": "maga2"    
   });
   
   let mgr = new this.Manager({
     clients: {
-      "Maga": {
+      "Maga2": {
         "homepage": "http://badgerbadgerbadger.com",
         "version": "1.0.0",
         "foo": "bar",
@@ -305,51 +305,11 @@ test['unsupported archive type'] = function*() {
   yield mgr.init();
   
   try {
-    yield mgr.download('Maga');
+    yield mgr.download('Maga2');
     throw -1;
   } catch (err) {
     err.message.should.contain(`Unsupported archive type: blah`);
   }
-};
-
-
-
-
-test['unpacks ok'] = function*() {
-  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
-    download: {
-      url: `${this.archiveTestHost}/maga.zip`,
-      type: 'zip'
-    },
-    "bin": "maga"    
-  });
-  
-  let mgr = new this.Manager({
-    clients: {
-      "Maga": {
-        "homepage": "http://badgerbadgerbadger.com",
-        "version": "1.0.0",
-        "foo": "bar",
-        "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
-          "platforms": platforms,
-        }
-      }
-    }
-  });
-  
-  // mgr.logger = console;
-  yield mgr.init();
-  
-  let ret = yield mgr.download('Maga');
-  
-  fs.accessSync(path.join(_get(ret, 'unzipFolder'), 'maga'), fs.F_OK);
 };
 
 
@@ -360,15 +320,15 @@ test['custom unpack handler'] = {
   before: function*() {
     const platforms = this.buildPlatformConfig(process.platform, process.arch, {
       download: {
-        url: `${this.archiveTestHost}/maga.zip`,
+        url: `${this.archiveTestHost}/maga2-good.zip`,
         type: 'invalid'
       },
-      "bin": "maga"    
+      "bin": "maga2"    
     });
     
     let mgr = new this.Manager({
       clients: {
-        "Maga": {
+        "Maga2": {
           "homepage": "http://badgerbadgerbadger.com",
           "version": "1.0.0",
           "foo": "bar",
@@ -395,7 +355,7 @@ test['custom unpack handler'] = {
   success: function*() {
     let spy = this.mocker.spy(() => Promise.resolve());
     
-    yield this.mgr.download('Maga', {
+    yield this.mgr.download('Maga2', {
       unpackHandler: spy
     });    
     
@@ -405,7 +365,7 @@ test['custom unpack handler'] = {
   
   fail: function*() {
     try {
-      yield this.mgr.download('Maga', {
+      yield this.mgr.download('Maga2', {
         unpackHandler: () => Promise.reject(new Error('foo!'))
       });        
       throw -1;      
@@ -416,6 +376,52 @@ test['custom unpack handler'] = {
 };
 
 
+
+
+
+test['unpacks and verifies ok'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    download: {
+      url: `${this.archiveTestHost}/maga2-good.zip`,
+      type: 'zip'
+    },
+    "bin": "maga2"    
+  });
+  
+  let mgr = new this.Manager({
+    clients: {
+      "Maga2": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "cli": {
+          "commands": {
+            "sanityCheck": {
+              "args": ['test'],
+              "output": [ "good:test" ]
+            }
+          },                  
+          "platforms": platforms,
+        }
+      }
+    }
+  });
+  
+  // mgr.logger = console;
+  yield mgr.init();
+  
+  let ret = yield mgr.download('Maga2');
+  
+  const downloadFolder = _get(ret, 'downloadFolder', '');
+  _get(ret, 'downloadFile', '').should.eql(path.join(downloadFolder, `archive.zip`));
+  _get(ret, 'unpackFolder', '').should.eql(path.join(downloadFolder, `unpacked`));
+
+  _get(ret, 'client.state.available', '').should.be.true;
+  _get(ret, 'client.activeCli.fullPath', '').should.eql(path.join(downloadFolder, `unpacked`, 'maga2'));
+  
+  mgr.clients.pop().should.eql(ret.client);
+};
 
 
 

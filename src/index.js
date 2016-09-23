@@ -120,6 +120,19 @@ class Manager {
    * 
    * If client doesn't support this platform then the promise will be rejected.
    *
+   * Upon completion the `clients` property will have been updated with the new 
+   * availability status of this client. In addition the following info will 
+   * be returned from the promise:
+   *
+   * ```
+   * {
+   *   downloadFolder: ...where archive got downloaded...
+   *   downloadFile: ...location of downloaded file...
+   *   unpackFolder: ...where archive was unpacked to...
+   *   client: ...updated client object (contains availability info and full binary path)...
+   * }
+   * ```
+   *
    * @param {Object} [options] Options.
    * @param {Object} [options.downloadFolder] Folder to download client to, and to unzip it in.
    * @param {Function} [options.unpackHandler] Custom download archive unpack handling function.
@@ -211,27 +224,27 @@ class Manager {
       const downloadFolder = dInfo.downloadFolder,
         downloadFile = dInfo.downloadFile;
       
-      const unzipFolder = path.join(downloadFolder, 'unpacked');
+      const unpackFolder = path.join(downloadFolder, 'unpacked');
       
-      this._logger.debug(`Unzipping ${downloadFile} to ${unzipFolder} ...`);
+      this._logger.debug(`Unzipping ${downloadFile} to ${unpackFolder} ...`);
 
       let promise;
       
       if (options.unpackHandler) {
         this._logger.debug(`Invoking custom unpack handler ...`);
 
-        promise = options.unpackHandler(downloadFile, unzipFolder);
+        promise = options.unpackHandler(downloadFile, unpackFolder);
       } else {
         switch (downloadCfg.type) {
           case 'zip':
             this._logger.debug(`Using unzip ...`);
 
-            promise = this._spawn('unzip', ['-o', downloadFile, '-d', unzipFolder]);
+            promise = this._spawn('unzip', ['-o', downloadFile, '-d', unpackFolder]);
             break;
           case 'tar':
             this._logger.debug(`Using tar ...`);
             
-            promise = this._spawn('tar', ['-xf', downloadFile, '-C', unzipFolder]);
+            promise = this._spawn('tar', ['-xf', downloadFile, '-C', unpackFolder]);
             break;
           default:
             throw new Error(`Unsupported archive type: ${downloadCfg.type}`);
@@ -239,13 +252,23 @@ class Manager {
       }
       
       return promise.then(() => {
-        this._logger.debug(`Unzipped ${downloadFile} to ${unzipFolder}`);
+        this._logger.debug(`Unzipped ${downloadFile} to ${unpackFolder}`);
         
         return {
           downloadFolder: downloadFolder,
           downloadFile: downloadFile,        
-          unzipFolder: unzipFolder,  
+          unpackFolder: unpackFolder,  
         };
+      });
+    })
+    .then((info) => {
+      return this._verifyClientStatus(client, {
+        folders: [info.unpackFolder],
+      })
+      .then(() => {
+        info.client = client;
+        
+        return info;
       });
     });
   }
@@ -297,7 +320,11 @@ class Manager {
         return;
       }
       
-      return this._verifyClientStatus(this._clients, options);
+      this._logger.info(`Verifying status of all ${clients.length} possible clients...`);
+      
+      return Promise.all(this._clients.map(
+        (client) => this._verifyClientStatus(client, options)
+      ));
     });
   }
   
@@ -333,23 +360,21 @@ class Manager {
   
   
   /**
-   * This will modify the items in the passed-in array according to check results.
+   * This will modify the passed-in `client` item according to check results.
    * 
    * @param {Object} [options] Additional options.
    * @param {Array} [options.folders] Additional folders to search in for client binaries.
    * 
    * @return {Promise}
    */
-  _verifyClientStatus (clients, options) {
+  _verifyClientStatus (client, options) {
     options = Object.assign({
       folders: []
     }, options);
+
+    this._logger.info(`Verify ${client.id} status ...`);
     
-    this._logger.info(`Verifying status of all ${clients.length} possible clients...`);
-    
-    return Promise.all(clients.map((client) => {
-      this._logger.info(`Checking ${client.id} availability ...`);
-      
+    return Promise.resolve().then(() => {
       const binName = client.activeCli.bin;
       
       // reset state
@@ -360,7 +385,8 @@ class Manager {
             
       const binPaths = [];
       
-      return this._spawn('command', ['-v', binName]) 
+      
+      return this._spawn('command', ['-v', binName])
       .then((output) => {
         const systemPath = _.get(output, 'stdout', '').trim();
         
@@ -369,6 +395,8 @@ class Manager {
 
           binPaths.push(systemPath);
         }
+      }, (err) => {
+        this._logger.debug(`Command ${binName} not found in path.`);
       })
       .then(() => {
         // now let's search additional folders
@@ -431,7 +459,7 @@ class Manager {
 
         client.state.available = false;
       })
-    }));
+    });
   }
   
   
