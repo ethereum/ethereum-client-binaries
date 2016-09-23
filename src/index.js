@@ -226,6 +226,10 @@ class Manager {
       
       const unpackFolder = path.join(downloadFolder, 'unpacked');
       
+      this._logger.debug(`Ensure unpack folder ${unpackFolder} exists ...`);
+      
+      mkdirp.sync(unpackFolder);
+
       this._logger.debug(`Unzipping ${downloadFile} to ${unpackFolder} ...`);
 
       let promise;

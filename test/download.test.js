@@ -425,5 +425,81 @@ test['unpacks and verifies ok'] = function*() {
 
 
 
+test['unpacked but no binary found'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    download: {
+      url: `${this.archiveTestHost}/no-maga2.tgz`,
+      type: 'tar'
+    },
+    "bin": "maga2"    
+  });
+  
+  let mgr = new this.Manager({
+    clients: {
+      "Maga2": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "cli": {
+          "commands": {
+            "sanityCheck": {
+              "args": ['test'],
+              "output": [ "good:test" ]
+            }
+          },                  
+          "platforms": platforms,
+        }
+      }
+    }
+  });
+  
+  // mgr.logger = console;
+  yield mgr.init();
+  
+  let ret = yield mgr.download('Maga2');
+  
+  _get(ret, 'client.state.available', '').should.be.false;
+  _get(ret, 'client.state.failReason', '').should.eql('notFound');
+  _get(ret, 'client.activeCli.fullPath', '').should.eql('');
+};
 
 
+test['unpacked but sanity check failed'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    download: {
+      url: `${this.archiveTestHost}/maga2-bad.zip`,
+      type: 'zip'
+    },
+    "bin": "maga2"    
+  });
+  
+  let mgr = new this.Manager({
+    clients: {
+      "Maga2": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "cli": {
+          "commands": {
+            "sanityCheck": {
+              "args": ['test'],
+              "output": [ "good:test" ]
+            }
+          },                  
+          "platforms": platforms,
+        }
+      }
+    }
+  });
+  
+  // mgr.logger = console;
+  yield mgr.init();
+  
+  let ret = yield mgr.download('Maga2');
+  
+  _get(ret, 'client.state.available', '').should.be.false;
+  _get(ret, 'client.state.failReason', '').should.eql('sanityCheckFail');
+  _get(ret, 'client.activeCli.fullPath', '').should.eql('');
+};
