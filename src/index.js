@@ -122,6 +122,7 @@ class Manager {
    *
    * @param {Object} [options] Options.
    * @param {Object} [options.downloadFolder] Folder to download client to, and to unzip it in.
+   * @param {Function} [options.unpackHandler] Custom download archive unpack handling function.
    *
    * @return {Promise} 
    */
@@ -144,7 +145,7 @@ class Manager {
         throw new Error(`${clientId} missing configuration for this platform.`);
       }
 
-      if (!_.get(downloadCfg, 'url') || !_.get(downloadCfg, 'unpack')) {
+      if (!_.get(downloadCfg, 'url') || !_.get(downloadCfg, 'type')) {
         throw new Error(`Download info not available for ${clientId}`);
       }
       
@@ -165,7 +166,7 @@ class Manager {
       
       mkdirp.sync(downloadFolder);
         
-      const downloadFile = path.join(downloadFolder, `download.archive`);
+      const downloadFile = path.join(downloadFolder, `archive.${downloadCfg.type}`);
 
       this._logger.info(`Downloading package from ${downloadCfg.url} to ${downloadFile} ...`);
 
@@ -189,11 +190,18 @@ class Manager {
       
       stream.on('end', () => {        
         this._logger.debug(`Downloaded ${downloadCfg.url} to ${downloadFile}`);
-
-        resolve({
-          downloadFolder: downloadFolder,
-          downloadFile: downloadFile,
-        });        
+        
+        // quick sanity check
+        try {
+          fs.accessSync(downloadFile, fs.F_OK | fs.R_OK);
+          
+          resolve({
+            downloadFolder: downloadFolder,
+            downloadFile: downloadFile,
+          });        
+        } catch (err) {
+          reject(new Error(`Error downloading package for ${clientId}: ${err.message}`));          
+        }
       });
       
       return promise;
@@ -202,17 +210,34 @@ class Manager {
       const downloadFolder = dInfo.downloadFolder,
         downloadFile = dInfo.downloadFile;
       
-      const unzipFolder = path.join(downloadFolder, 'unzipped');
+      const unzipFolder = path.join(downloadFolder, 'unpacked');
       
       this._logger.debug(`Unzipping ${downloadFile} to ${unzipFolder} ...`);
 
-      const cmd = (downloadCfg.unpack)
-        .replace('$inputFile', downloadFile)
-        .replace('$outputDir', unzipFolder)
-        .split(' ');
+      let promise;
+      
+      if (options.unzipHandler) {
+        this._logger.debug(`Invoking custom unzip handler ...`);
 
-      return this._spawn(cmd[0], cmd.slice(1))
-      then(() => {
+        promise = options.unpackHandler(downloadFile, unzipFolder);
+      } else {
+        switch (downloadCfg.type) {
+          case 'zip':
+            this._logger.debug(`Using unzip ...`);
+
+            promise = this._spawn('unzip', ['-o', downloadFile, '-d', unzipFolder]);
+            break;
+          case 'tar':
+            this._logger.debug(`Using tar ...`);
+            
+            promise = this._spawn('tar', ['-xf', downloadFile, '-C', unzipFolder]);
+            break;
+          default:
+            throw new Error(`Unsupported archive type: ${downloadCfg.type}`);
+        }        
+      }
+      
+      return promise.then(() => {
         this._logger.debug(`Unzipped ${downloadFile} to ${unzipFolder}`);
         
         return {
@@ -221,10 +246,6 @@ class Manager {
           unzipFolder: unzipFolder,  
         };
       });
-    })
-    .then((info) => {
-      // check for binary
-      
     });
   }
   

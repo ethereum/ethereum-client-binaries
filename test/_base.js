@@ -10,6 +10,7 @@ const _ = {
 };
 
 const path = require('path'),
+  liveServer = require("live-server"),
   fs = require('fs'),
   Q = require('bluebird'),
   genomatic = require('genomatic'),
@@ -36,7 +37,24 @@ module.exports = function(_module) {
       p[`${platform}`] = {};
       p[`${platform}`][`${arch}`] = cfg;
       return p;
-    }
+    },
+    startServer: function*() {
+      liveServer.start({
+        port: 38081, // Set the server port. Defaults to 8080.
+        root: path.join(__dirname, 'archives'), // Set root directory that's being served. Defaults to cwd.
+        open: false, // When false, it won't load your browser by default.
+        logLevel: 0, // 0 = errors only, 1 = some, 2 = lots
+      });
+      
+      yield Q.delay(1000);
+      
+      this.archiveTestHost = 'http://localhost:38081';
+    },
+    stopServer: function*() {
+      liveServer.shutdown();
+      
+      yield Q.delay(1000);
+    },
   };
 
   const test = {
