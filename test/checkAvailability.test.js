@@ -34,7 +34,7 @@ test['client not supported on architecture'] = function*() {
           "commands": {
             "sanityCheck": {
               "args": ['test'],
-              "output": [ "boom:test" ]
+              "output": [ "good:test" ]
             }
           },                  
           "platforms": platforms,
@@ -68,7 +68,7 @@ test['client not supported on platform'] = function*() {
           "commands": {
             "sanityCheck": {
               "args": ['test'],
-              "output": [ "boom:test" ]
+              "output": [ "good:test" ]
             }
           },                  
           "platforms": platforms,
@@ -102,7 +102,7 @@ test['unable to resolve binary'] = function*() {
           "commands": {
             "sanityCheck": {
               "args": ['test'],
-              "output": [ "boom:test" ]
+              "output": [ "good:test" ]
             }
           },                  
           "platforms": platforms,
@@ -179,7 +179,7 @@ test['sanity check passed'] = function*() {
           "commands": {
             "sanityCheck": {
               "args": ['test'],
-              "output": [ "boom:test" ]
+              "output": [ "good:test" ]
             }
           },                  
           "platforms": platforms,
@@ -250,7 +250,7 @@ test['client config returned'] = function*() {
           "commands": {
             "sanityCheck": {
               "args": ['test'],
-              "output": [ "boom:test" ]
+              "output": [ "good:test" ]
             }
           },                  
           "platforms": platforms,
@@ -275,6 +275,58 @@ test['client config returned'] = function*() {
       url: 'http://badgerbadgerbadger.com',
       bin: 'maga',
       fullPath: path.join(__dirname, 'bin', 'maga'),
+    }
+  }));
+};
+
+
+
+test['search additional folders'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    "url": "http://badgerbadgerbadger.com",
+    "bin": "rada"    
+  });
+  
+  const config = {
+    clients: {
+      "Rada": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "cli": {
+          "commands": {
+            "sanityCheck": {
+              "args": ['test'],
+              "output": [ "good", "test" ]
+            }
+          },                  
+          "platforms": platforms,
+        }
+      }
+    }
+  };
+  
+  let mgr = new this.Manager(config);
+  
+  // mgr.logger = console;
+  yield mgr.init({
+    folders: [
+      path.join(__dirname, 'bin', 'folder2')
+    ]
+  });
+  
+  const client = mgr.clients.pop();
+  
+  client.should.eql(Object.assign({}, config.clients.Rada, {
+    id: 'Rada',
+    state: {
+      available: true,
+    },
+    activeCli: {
+      url: 'http://badgerbadgerbadger.com',
+      bin: 'rada',
+      fullPath: path.join(__dirname, 'bin', 'folder2', 'rada'),
     }
   }));
 };

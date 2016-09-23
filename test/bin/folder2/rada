@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo "good"
+echo "good again"
+echo "$1"

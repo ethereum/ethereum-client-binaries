@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo "boom:$1"
+echo "good:$1"
