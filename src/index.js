@@ -129,6 +129,7 @@ class Manager {
   download (clientId, options) {
     options = Object.assign({
       downloadFolder: null,
+      unpackHandler: null,
     }, options);
     
     this._logger.info(`Download binary for ${clientId} ...`);
@@ -216,8 +217,8 @@ class Manager {
 
       let promise;
       
-      if (options.unzipHandler) {
-        this._logger.debug(`Invoking custom unzip handler ...`);
+      if (options.unpackHandler) {
+        this._logger.debug(`Invoking custom unpack handler ...`);
 
         promise = options.unpackHandler(downloadFile, unzipFolder);
       } else {

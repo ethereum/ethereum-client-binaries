@@ -361,7 +361,7 @@ test['custom unpack handler'] = {
     const platforms = this.buildPlatformConfig(process.platform, process.arch, {
       download: {
         url: `${this.archiveTestHost}/maga.zip`,
-        type: 'zip'
+        type: 'invalid'
       },
       "bin": "maga"    
     });
@@ -400,7 +400,7 @@ test['custom unpack handler'] = {
     });    
     
     spy.should.have.been.calledOnce;
-    spy.getCall(1).args.length.should.eql(2);
+    spy.getCall(0).args.length.should.eql(2);
   },
   
   fail: function*() {
