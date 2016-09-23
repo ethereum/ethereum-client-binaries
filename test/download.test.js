@@ -36,7 +36,13 @@ test['no clients'] = function*() {
 test['client not supported on architecture'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, 'invalid', {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -47,12 +53,6 @@ test['client not supported on architecture'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -75,7 +75,13 @@ test['client not supported on architecture'] = function*() {
 test['client not supported on platform'] = function*() {
   const platforms = this.buildPlatformConfig('invalid', process.arch, {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -86,12 +92,6 @@ test['client not supported on platform'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -113,7 +113,13 @@ test['client not supported on platform'] = function*() {
 
 test['download info not available'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -124,12 +130,6 @@ test['download info not available'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -154,7 +154,13 @@ test['download url not available'] = function*() {
     download: {
       type: 'blah'
     },
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -165,12 +171,6 @@ test['download url not available'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -194,7 +194,13 @@ test['download unpack command not available'] = function*() {
     download: {
       url: 'http://adsfasd.com'
     },
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -205,12 +211,6 @@ test['download unpack command not available'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -236,7 +236,13 @@ test['download fails'] = function*() {
       url: `${this.archiveTestHost}/invalid.zip`,
       type: 'zip'
     },
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -247,12 +253,6 @@ test['download fails'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -278,7 +278,13 @@ test['unsupported archive type'] = function*() {
       url: `${this.archiveTestHost}/maga2-good.zip`,
       type: 'blah'
     },
-    "bin": "maga2"    
+    "bin": "maga2",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -289,12 +295,6 @@ test['unsupported archive type'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -323,7 +323,13 @@ test['custom unpack handler'] = {
         url: `${this.archiveTestHost}/maga2-good.zip`,
         type: 'invalid'
       },
-      "bin": "maga2"    
+      "bin": "maga2",
+      "commands": {
+        "sanity": {
+          "args": ['test'],
+          "output": [ "good:test" ]
+        }
+      },               
     });
     
     let mgr = new this.Manager({
@@ -334,12 +340,6 @@ test['custom unpack handler'] = {
           "foo": "bar",
           "versionNotes": "http://badgerbadgerbadger.com",
           "cli": {
-            "commands": {
-              "sanityCheck": {
-                "args": ['test'],
-                "output": [ "good:test" ]
-              }
-            },                  
             "platforms": platforms,
           }
         }
@@ -385,7 +385,13 @@ test['unpacks and verifies ok'] = function*() {
       url: `${this.archiveTestHost}/maga2-good.zip`,
       type: 'zip'
     },
-    "bin": "maga2"    
+    "bin": "maga2",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -396,12 +402,6 @@ test['unpacks and verifies ok'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -431,7 +431,13 @@ test['unpacked but no binary found'] = function*() {
       url: `${this.archiveTestHost}/no-maga2.tgz`,
       type: 'tar'
     },
-    "bin": "maga2"    
+    "bin": "maga2",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -442,12 +448,6 @@ test['unpacked but no binary found'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -471,7 +471,13 @@ test['unpacked but sanity check failed'] = function*() {
       url: `${this.archiveTestHost}/maga2-bad.zip`,
       type: 'zip'
     },
-    "bin": "maga2"    
+    "bin": "maga2",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -482,12 +488,6 @@ test['unpacked but sanity check failed'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }

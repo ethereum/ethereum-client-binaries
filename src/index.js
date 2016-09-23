@@ -480,7 +480,7 @@ class Manager {
     
     this._logger.info(`Checking for ${client.id} sanity check ...`);
             
-    const sanityCheck = _.get(client, 'cli.commands.sanityCheck');
+    const sanityCheck = _.get(client, 'activeCli.commands.sanity');
     
     return Promise.resolve()
     .then(() => {

@@ -20,7 +20,13 @@ test['no clients'] = function*() {
 test['client not supported on architecture'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, 'invalid', {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },                  
   });
   
   let mgr = new this.Manager({
@@ -31,12 +37,6 @@ test['client not supported on architecture'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -54,7 +54,13 @@ test['client not supported on architecture'] = function*() {
 test['client not supported on platform'] = function*() {
   const platforms = this.buildPlatformConfig('invalid', process.arch, {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -65,12 +71,6 @@ test['client not supported on platform'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -88,7 +88,13 @@ test['client not supported on platform'] = function*() {
 test['unable to resolve binary'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "invalid"    
+    "bin": "invalid",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -99,12 +105,6 @@ test['unable to resolve binary'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -127,7 +127,13 @@ test['unable to resolve binary'] = function*() {
 test['sanity check failed'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "invalid" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -138,12 +144,6 @@ test['sanity check failed'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "invalid" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -165,7 +165,13 @@ test['sanity check failed'] = function*() {
 test['sanity check passed'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   let mgr = new this.Manager({
@@ -176,12 +182,6 @@ test['sanity check passed'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -236,7 +236,13 @@ test['sanity check is mandatory'] = function*() {
 test['client config returned'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "maga"    
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
   });
   
   const config = {
@@ -247,12 +253,6 @@ test['client config returned'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good:test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -275,6 +275,12 @@ test['client config returned'] = function*() {
       url: 'http://badgerbadgerbadger.com',
       bin: 'maga',
       fullPath: path.join(__dirname, 'bin', 'maga'),
+      "commands": {
+        "sanity": {
+          "args": ['test'],
+          "output": [ "good:test" ]
+        }
+      },               
     }
   }));
 };
@@ -284,7 +290,13 @@ test['client config returned'] = function*() {
 test['search additional folders'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     "url": "http://badgerbadgerbadger.com",
-    "bin": "rada"    
+    "bin": "rada",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good", "test" ]
+      }
+    },               
   });
   
   const config = {
@@ -295,12 +307,6 @@ test['search additional folders'] = function*() {
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
         "cli": {
-          "commands": {
-            "sanityCheck": {
-              "args": ['test'],
-              "output": [ "good", "test" ]
-            }
-          },                  
           "platforms": platforms,
         }
       }
@@ -327,6 +333,12 @@ test['search additional folders'] = function*() {
       url: 'http://badgerbadgerbadger.com',
       bin: 'rada',
       fullPath: path.join(__dirname, 'bin', 'folder2', 'rada'),
+      commands: {
+        "sanity": {
+          "args": ['test'],
+          "output": [ "good", "test" ]
+        }        
+      }
     }
   }));
 };
