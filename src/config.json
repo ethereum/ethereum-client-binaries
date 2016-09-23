@@ -16,7 +16,7 @@
             "x64": {
               "download": {
                 "url": "https://github.com/ethereum/go-ethereum/releases/download/v1.4.11/geth-Linux64-20160819135300-1.4.11-fed692f.tar.bz2",
-                "type": "tar"
+                "unpack": "tar -xf $inputFile -C $outputDir"
               },
               "bin": "geth"
             }
@@ -25,7 +25,7 @@
             "x64": {
               "download": {
                 "url": "https://github.com/ethereum/go-ethereum/releases/download/v1.4.11/geth-OSX-20160818153612-1.4.11-fed692f.zip",
-                "type": "zip"
+                "unpack": "unzip -o $inputFile -d $outputDir"
               },
               "bin": "geth"
             }
@@ -34,7 +34,7 @@
             "x64": {
               "download": {
                 "url": "https://github.com/ethereum/go-ethereum/releases/download/v1.4.11/Geth-Win64-20160818153642-1.4.11-fed692f.zip",
-                "type": "zip"
+                "unpack": "unzip -o $inputFile -d $outputDir"
               },
               "bin": "geth.exe"
             }

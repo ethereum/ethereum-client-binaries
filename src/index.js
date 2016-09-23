@@ -4,6 +4,7 @@ const got = require('got'),
   fs = require('fs'),
   path = require('path'),
   tmp = require('tmp'),
+  mkdirp = require('mkdirp'),
   // EventEmitter = require('events'),
   // progress = require('progress-stream'),
   spawn = require('buffered-spawn');
@@ -113,12 +114,11 @@ class Manager {
   /**
    * Download a particular client.
    *
-   * If client has config this platform then 
-   * it will be downloaded from the download URL, whether is already available 
+   * If client supports this platform then 
+   * it will be downloaded from the download URL, whether it is already available 
    * on the system or not.
    * 
-   * If client doesn't have config for current platform then this will thrown an 
-   * error.
+   * If client doesn't support this platform then the promise will be rejected.
    *
    * @param {Object} [options] Options.
    * @param {Object} [options.downloadFolder] Folder to download client to, and to unzip it in.
@@ -132,12 +132,8 @@ class Manager {
     
     this._logger.info(`Download binary for ${clientId} ...`);
 
-    let client = (this._config || []).filter((c) => {
-      return (c.id === clientId);
-    });
+    const client = (this._clients || []).filter((c) => c.id === clientId).pop();
     
-    client = _.get(client, '0');
-
     const activeCli = _.get(client, `activeCli`),
       downloadCfg = _.get(activeCli, `download`);
 
@@ -148,7 +144,7 @@ class Manager {
         throw new Error(`${clientId} missing configuration for this platform.`);
       }
 
-      if (!_.get(downloadCfg, 'url') || !_.get(downloadCfg, 'type')) {
+      if (!_.get(downloadCfg, 'url') || !_.get(downloadCfg, 'unpack')) {
         throw new Error(`Download info not available for ${clientId}`);
       }
       
@@ -157,21 +153,25 @@ class Manager {
         resolve = _resolve;
         reject = _reject;
       });
+
+      this._logger.debug('Generating download folder path ...');
       
       const downloadFolder = path.join(
-        options.downloadFolder || path.join(tmp.dirSync(), clientId),
-        clientId
+        options.downloadFolder || tmp.dirSync().name,
+        client.id
       );
-        
-      this._logger.debug(`Downloading to folder ${downloadFolder} ...`);
       
-      const downloadFile = path.join(downloadFolder, `download.${downloadCfg.type}`);
+      this._logger.debug(`Ensure download folder ${downloadFolder} exists ...`);
+      
+      mkdirp.sync(downloadFolder);
+        
+      const downloadFile = path.join(downloadFolder, `download.archive`);
 
       this._logger.info(`Downloading package from ${downloadCfg.url} to ${downloadFile} ...`);
 
       const writeStream = fs.createWriteStream(downloadFile);
       
-      const stream = got.stream(cfg.url);
+      const stream = got.stream(downloadCfg.url);
       
       // stream.pipe(progress({
       //   time: 100
@@ -182,9 +182,9 @@ class Manager {
       // stream.on('progress', (info) => );
       
       stream.on('error', (err) => {
-        this._logger.error(`Error downloading package for ${clientId}`, err);
+        this._logger.error(err);
         
-        reject(err);
+        reject(new Error(`Error downloading package for ${clientId}: ${err.message}`));
       })
       
       stream.on('end', () => {        
@@ -206,20 +206,13 @@ class Manager {
       
       this._logger.debug(`Unzipping ${downloadFile} to ${unzipFolder} ...`);
 
-      let promise;
-      
-      switch (downloadCfg.type) {
-        case 'zip':
-          promise = this._spawn('unzip', ['-o', downloadFile, '-d', unzipFolder]);
-          break;
-        case 'tar':
-          promise = this._spawn('tar', ['-xf', downloadFile, '-C', unzipFolder]);
-          break;
-        default:
-          throw new Error(`Unsupported zip type: ${downloadCfg.type}`);
-      }
-      
-      return promise.then(() => {
+      const cmd = (downloadCfg.unpack)
+        .replace('$inputFile', downloadFile)
+        .replace('$outputDir', unzipFolder)
+        .split(' ');
+
+      return this._spawn(cmd[0], cmd.slice(1))
+      then(() => {
         this._logger.debug(`Unzipped ${downloadFile} to ${unzipFolder}`);
         
         return {
@@ -459,6 +452,8 @@ class Manager {
         }
       }
       
+      this._logger.debug(`Sanity check passed for ${binPath}`);      
+
       // set it!
       client.activeCli.fullPath = binPath;
     })
