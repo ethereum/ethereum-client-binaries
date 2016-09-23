@@ -1,6 +1,7 @@
 "use strict";
 
 const got = require('got'),
+  fs = require('fs'),
   path = require('path'),
   tmp = require('tmp'),
   // EventEmitter = require('events'),
@@ -95,14 +96,17 @@ class Manager {
    * This will scan for clients.
    * Upon completion `this.clients` will have all the info you need.
    *
+   * @param {Object} [options] Additional options.
+   * @param {Array} [options.folders] Additional folders to search in for client binaries.
+   * 
    * @return {Promise}
    */
-  init() {
+  init(options) {
     this._logger.info('Initializing...');
     
     this._resolvePlatform();
     
-    return this._scan();
+    return this._scan(options);
   }
   
   
@@ -126,7 +130,7 @@ class Manager {
       downloadFolder: null,
     }, options);
     
-    this._logger.info(`Download binary for client ${clientId} ...`);
+    this._logger.info(`Download binary for ${clientId} ...`);
 
     let client = (this._config || []).filter((c) => {
       return (c.id === clientId);
@@ -141,11 +145,11 @@ class Manager {
     .then(() => {
       // not for this machine?
       if (!client) {
-        throw new Error(`Client ${clientId} missing configuration for this platform.`);
+        throw new Error(`${clientId} missing configuration for this platform.`);
       }
 
       if (!_.get(downloadCfg, 'url') || !_.get(downloadCfg, 'type')) {
-        throw new Error(`Download info not available for client ${clientId}`);
+        throw new Error(`Download info not available for ${clientId}`);
       }
       
       let resolve, reject;
@@ -178,7 +182,7 @@ class Manager {
       // stream.on('progress', (info) => );
       
       stream.on('error', (err) => {
-        this._logger.error(`Error downloading package for client ${clientId}`, err);
+        this._logger.error(`Error downloading package for ${clientId}`, err);
         
         reject(err);
       })
@@ -260,9 +264,12 @@ class Manager {
    *
    * Upon completion `this._clients` will be set.
    *
+   * @param {Object} [options] Additional options.
+   * @param {Array} [options.folders] Additional folders to search in for client binaries.
+   * 
    * @return {Promise}
    */
-  _scan () {
+  _scan (options) {    
     this._clients = [];
 
     return this._calculatePossibleClients()
@@ -275,12 +282,13 @@ class Manager {
         return;
       }
       
-      return this._verifyClientStatus(this._clients);
+      return this._verifyClientStatus(this._clients, options);
     });
   }
   
   
   /**
+   * Calculate possible clients for this machine by searching for binaries.
    * @return {Promise}
    */
   _calculatePossibleClients () {
@@ -312,54 +320,100 @@ class Manager {
   /**
    * This will modify the items in the passed-in array according to check results.
    * 
+   * @param {Object} [options] Additional options.
+   * @param {Array} [options.folders] Additional folders to search in for client binaries.
+   * 
    * @return {Promise}
    */
-  _verifyClientStatus (clients) {
+  _verifyClientStatus (clients, options) {
+    options = Object.assign({
+      folders: []
+    }, options);
+    
     this._logger.info(`Verifying status of all ${clients.length} possible clients...`);
     
     return Promise.all(clients.map((client) => {
-      this._logger.info(`Checking ${client.id} availability...`);
+      this._logger.info(`Checking ${client.id} availability ...`);
       
       const binName = client.activeCli.bin;
       
+      // reset state
+      client.state = {};
+      delete client.activeCli.binPath;
+      
       this._logger.debug(`${client.id} binary name: ${binName}`);
             
+      const binPaths = [];
+      
       return this._spawn('command', ['-v', binName]) 
       .then((output) => {
-        const fullPath = _.get(output, 'stdout', '').trim();
+        const systemPath = _.get(output, 'stdout', '').trim();
         
-        if (!_.get(fullPath, 'length')) {
-          throw new Error(`Command not found: ${binName}`);
+        if (_.get(systemPath, 'length')) {
+          this._logger.debug(`Got PATH binary for ${client.id}: ${systemPath}`);
+
+          binPaths.push(systemPath);
         }
-        
-        return fullPath;
+      })
+      .then(() => {
+        // now let's search additional folders
+        if (_.get(options, 'folders.length')) {
+          options.folders.forEach((folder) => {
+            const fullPath = path.join(folder, binName);
+            
+            try {
+              fs.accessSync(fullPath, fs.F_OK | fs.X_OK);
+              
+              this._logger.debug(`Got optional folder binary for ${client.id}: ${fullPath}`);
+
+              binPaths.push(fullPath);
+            } catch (err) { 
+              /* do nothing */
+            }
+          });
+        }
+      })
+      .then(() => {
+        if (!binPaths.length) {
+          throw new Error(`No binaries found for ${client.id}`);
+        }
       })
       .catch((err) => {
         this._logger.error(`Unable to resolve ${client.id} executable: ${binName}`);
         
-        client.state = {
-          available: false,
-          failReason: 'notFound',
-        };
+        client.state.available = false;
+        client.state.failReason = 'notFound';
         
         throw err;
       })
-      .then((fullPath) => {
-        return this._runSanityCheck(client, fullPath)
-        .catch((err) => {
-          client.state = {
-            failReason: 'sanityCheckFail',
-          };
+      .then(() => {        
+        // sanity check each available binary until a good one is found
+        return Promise.all(binPaths.map((binPath) => {
+          this._logger.debug(`Running ${client.id} sanity check for binary: ${binPath} ...`);
           
-          throw err;
+          return this._runSanityCheck(client, binPath)
+          .catch((err) => {
+            this._logger.debug(`Sanity check failed for: ${binPath}`);
+          });          
+        }))
+        .then(() => {
+          // if one succeeded then we're good
+          if (client.activeCli.fullPath) {
+            return;
+          }
+          
+          client.state.available = false;
+          client.state.failReason = 'sanityCheckFail';
+          
+          throw new Error('All sanity checks failed');
         });
       })
       .then(() => {
-        client.state = client.state || {};
         client.state.available = true;
       })
       .catch((err) => {
-        client.state = client.state || {};
+        this._logger.debug(`${client.id} deemed unavailable`);
+
         client.state.available = false;
       })
     }));
@@ -371,25 +425,27 @@ class Manager {
    
    * @param {Object} client Client config info.
    * @param {String} binPath Path to binary (to sanity-check).
+   *
+   * @return {Promise}
    */
   _runSanityCheck (client, binPath) {
-    this._logger.debug(`${client.id} binary path: ${fullPath}`);
+    this._logger.debug(`${client.id} binary path: ${binPath}`);
     
-    client.activeCli.fullPath = fullPath;
-
-    this._logger.info(`Checking for ${client.id} sanity check...`);
+    this._logger.info(`Checking for ${client.id} sanity check ...`);
             
     const sanityCheck = _.get(client, 'cli.commands.sanityCheck');
     
-    if (!sanityCheck) {
-      this._logger.debug(`No sanity check set for ${client.id}, so skipping.`);
+    return Promise.resolve()
+    .then(() => {
+      if (!sanityCheck) {
+        throw new Error(`No ${client.id} sanity check found.`);
+      }      
+    })
+    .then(() => {
+      this._logger.info(`Checking sanity for ${client.id} ...`)
       
-      return;
-    }
-    
-    this._logger.info(`Checking sanity for ${client.id}...`)
-    
-    return this._spawn(client.activeCli.fullPath, sanityCheck.args)
+      return this._spawn(binPath, sanityCheck.args);      
+    })
     .then((output) => {
       const haystack = output.stdout + output.stderr;
       
@@ -402,6 +458,9 @@ class Manager {
           throw new Error(`Unable to find "${needle}" in ${client.id} output`);
         }
       }
+      
+      // set it!
+      client.activeCli.fullPath = binPath;
     })
     .catch((err) => {
       this._logger.error(`Sanity check failed for ${client.id}`, err);

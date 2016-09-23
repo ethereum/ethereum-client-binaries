@@ -200,7 +200,7 @@ test['sanity check passed'] = function*() {
 
 
 
-test['sanity check not strictly needed'] = function*() {
+test['sanity check is mandatory'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     "url": "http://badgerbadgerbadger.com",
     "bin": "maga"    
@@ -227,7 +227,8 @@ test['sanity check not strictly needed'] = function*() {
   
   const client = mgr.clients.pop();
   
-  client.state.available.should.be.true;
+  client.state.available.should.be.false;
+  client.state.failReason.should.eql('sanityCheckFail');
 };
 
 
