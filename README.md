@@ -2,7 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/hiddentao/ethereum-clients.png?branch=master)](http://travis-ci.org/hiddentao/ethereum-clients) [![NPM module](https://badge.fury.io/js/ethereum-clients.png)](https://badge.fury.io/js/ethereum-clients) [![Twitter URL](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Follow&maxAge=2592000)](https://twitter.com/hiddentao)
 
-Node.js library for managing Ethereum client software locally.
+Node.js library to scan for and download Ethereum client software to run locally.
 
 
 **Work-in-progress**

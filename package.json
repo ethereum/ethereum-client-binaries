@@ -1,7 +1,7 @@
 {
   "name": "ethereum-clients",
   "version": "1.0.0",
-  "description": "Download and manage Ethereum client software installed locally",
+  "description": "Scan for and download Ethereum client software to run locally",
   "main": "src/index.js",
   "scripts": {
     "test": "mocha --timeout 180000 --ui exports --reporter spec test/*.test.js",
