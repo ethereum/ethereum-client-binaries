@@ -1,8 +1,21 @@
 # ethereum-clients
 
-Node.js library for managing Ethereun client software on the local machine. 
+[![Build Status](https://secure.travis-ci.org/hiddentao/ethereum-clients.png?branch=master)](http://travis-ci.org/hiddentao/ethereum-clients) [![NPM module](https://badge.fury.io/js/ethereum-clients.png)](https://badge.fury.io/js/ethereum-clients) [![Twitter URL](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Follow&maxAge=2592000)](https://twitter.com/hiddentao)
 
-**WIP**
+Node.js library for managing Ethereum client software locally.
+
+
+**Work-in-progress**
+
+
+## Development
+
+To build and run the tests:
+
+```shell
+$ npm install
+$ npm test
+```
 
 ## Contributions
 
