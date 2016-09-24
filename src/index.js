@@ -527,7 +527,11 @@ class Manager {
     
     this._logger.debug(`Exec: "${cmd} ${args.join(' ')}"`);
     
-    return spawn(cmd, args);
+    return spawn(cmd, args, {
+      env: {
+        PATH: process.env.PATH
+      }
+    });
   }
 }
 
