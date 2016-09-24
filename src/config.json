@@ -6,14 +6,27 @@
           "linux": {
             "x64": {
               "download": {
-                "url": "https://github.com/ethereum/go-ethereum/releases/download/v1.4.11/geth-Linux64-20160819135300-1.4.11-fed692f.tar.bz2",
+                "url": "https://bintray.com/artifact/download/karalabe/ethereum/geth-1.4.12-stable-421df86-linux-amd64.tar.bz2",
                 "type": "tar"
               },
               "bin": "geth",
               "commands": {
                 "sanity": {
                   "args": ["version"],
-                  "output": [ "Geth", "Version: 1.4.11" ]
+                  "output": [ "Geth" ]
+                }                
+              }
+            },
+            "ia32": {
+              "download": {
+                "url": "https://bintray.com/artifact/download/karalabe/ethereum/geth-1.4.12-stable-421df86-linux-386.tar.bz2",
+                "type": "tar"
+              },
+              "bin": "geth",
+              "commands": {
+                "sanity": {
+                  "args": ["version"],
+                  "output": [ "Geth" ]
                 }                
               }
             }
@@ -21,14 +34,14 @@
           "mac": {
             "x64": {
               "download": {
-                "url": "https://github.com/ethereum/go-ethereum/releases/download/v1.4.11/geth-OSX-20160818153612-1.4.11-fed692f.zip",
-                "type": "zip"
+                "url": "https://bintray.com/artifact/download/karalabe/ethereum/geth-1.4.12-stable-421df86-darwin-10.6-amd64.tar.bz2",
+                "type": "tar"
               },
               "bin": "geth",
               "commands": {
                 "sanity": {
                   "args": ["version"],
-                  "output": [ "Geth", "Version: 1.4.11" ]
+                  "output": [ "Geth" ]
                 }                
               }
             }
@@ -43,10 +56,23 @@
               "commands": {
                 "sanity": {
                   "args": ["version"],
-                  "output": [ "Geth", "Version: 1.4.11" ]
+                  "output": [ "Geth" ]
                 }                
               }
-            }
+            },
+            "x64": {
+              "download": {
+                "url": "https://bintray.com/artifact/download/karalabe/ethereum/geth-1.4.12-stable-421df86-windows-4.0-386.exe.zip",
+                "type": "zip"
+              },
+              "bin": "geth.exe",
+              "commands": {
+                "sanity": {
+                  "args": ["version"],
+                  "output": [ "Geth" ]
+                }                
+              }
+            }            
           }
         }
       }
