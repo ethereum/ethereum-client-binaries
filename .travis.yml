@@ -11,6 +11,8 @@ node_js:
 before_script:
   - "sudo ln -s $PWD/test/bin/maga /usr/local/bin/maga"
   - "sudo ln -s $PWD/test/bin/rada /usr/local/bin/rada"
+  - "command -v maga"
+  - "command -v rada"
 
 script:
   - "npm run test-coverage"
