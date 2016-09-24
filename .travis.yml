@@ -6,6 +6,11 @@ language: node_js
 node_js:
   - "4"
   - "6"
+  
+# adding test/bin to process.env.PATH doesn't do what we need on Travis
+before_script:
+  - "sudo ln -s $PWD/test/bin/maga /usr/local/bin/maga"
+  - "sudo ln -s $PWD/test/bin/rada /usr/local/bin/rada"
 
 script:
   - "npm run test-coverage"

@@ -527,7 +527,6 @@ class Manager {
     
     this._logger.debug(`Exec: "${cmd} ${args.join(' ')}"`);
     
-    console.log(process.env.PATH);
     return spawn(cmd, args);
   }
 }
