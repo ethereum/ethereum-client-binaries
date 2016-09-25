@@ -348,11 +348,11 @@ class Manager {
       for (let clientName in _.get(this._config, 'clients', {})) {
         let client = this._config.clients[clientName];
         
-        if (_.get(client, `cli.platforms.${this._os}.${this._arch}`)) {
+        if (_.get(client, `platforms.${this._os}.${this._arch}`)) {
           possibleClients.push(
             Object.assign({}, client, {
               id: clientName,
-              activeCli: client.cli.platforms[this._os][this._arch]
+              activeCli: client.platforms[this._os][this._arch]
             })
           );
         }

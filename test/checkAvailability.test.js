@@ -36,9 +36,7 @@ test['client not supported on architecture'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -70,9 +68,7 @@ test['client not supported on platform'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -104,9 +100,7 @@ test['unable to resolve binary'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -143,9 +137,7 @@ test['sanity check failed'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -181,9 +173,7 @@ test['sanity check passed'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -213,9 +203,7 @@ test['sanity check is mandatory'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -252,9 +240,7 @@ test['client config returned'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   };
@@ -306,9 +292,7 @@ test['search additional folders'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   };

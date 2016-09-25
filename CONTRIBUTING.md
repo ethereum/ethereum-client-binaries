@@ -1,10 +1,10 @@
-# Contribute to ethereum-clients
+# Contribute to ethereum-client-binaries
 
 This guide guidelines for those wishing to contribute.
 
 ## Contributor license agreement
 
-By submitting code as an individual or as an entity you agree that your code is licensed the same as `ethereum-clients`.
+By submitting code as an individual or as an entity you agree that your code is licensed the same as `ethereum-client-binaries`.
 
 ## Issues and pull requests
 

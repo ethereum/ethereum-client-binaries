@@ -52,9 +52,7 @@ test['client not supported on architecture'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -91,9 +89,7 @@ test['client not supported on platform'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -129,9 +125,7 @@ test['download info not available'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -170,9 +164,7 @@ test['download url not available'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -210,9 +202,7 @@ test['download unpack command not available'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -252,9 +242,7 @@ test['download fails'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -294,9 +282,7 @@ test['unsupported archive type'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -339,9 +325,7 @@ test['custom unpack handler'] = {
           "version": "1.0.0",
           "foo": "bar",
           "versionNotes": "http://badgerbadgerbadger.com",
-          "cli": {
-            "platforms": platforms,
-          }
+          "platforms": platforms,
         }
       }
     });
@@ -401,9 +385,7 @@ test['unpacks and verifies ok'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -447,9 +429,7 @@ test['unpacked but no binary found'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
@@ -487,9 +467,7 @@ test['unpacked but sanity check failed'] = function*() {
         "version": "1.0.0",
         "foo": "bar",
         "versionNotes": "http://badgerbadgerbadger.com",
-        "cli": {
-          "platforms": platforms,
-        }
+        "platforms": platforms,
       }
     }
   });
