@@ -1,6 +1,6 @@
 {
   "name": "ethereum-client-binaries",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Download Ethereum client binaries for your OS",
   "main": "src/index.js",
   "scripts": {

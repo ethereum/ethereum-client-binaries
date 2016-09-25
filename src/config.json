@@ -59,7 +59,7 @@
               }                
             }
           },
-          "x64": {
+          "ia32": {
             "download": {
               "url": "https://bintray.com/artifact/download/karalabe/ethereum/geth-1.4.12-stable-421df86-windows-4.0-386.exe.zip",
               "type": "zip"
