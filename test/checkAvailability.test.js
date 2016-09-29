@@ -1,7 +1,7 @@
 "use strict";
 
 const path = require('path');
-
+const _values = require('lodash.values');
 const test = require('./_base')(module);
 
 
@@ -13,7 +13,7 @@ test['no clients'] = function*() {
   // mgr.logger = console;
   yield mgr.init();
   
-  mgr.clients.length.should.eql(0);
+  Object.keys(mgr.clients).length.should.eql(0);
 };
 
 
@@ -44,7 +44,7 @@ test['client not supported on architecture'] = function*() {
   // mgr.logger = console;
   yield mgr.init();
   
-  mgr.clients.length.should.eql(0);
+  Object.keys(mgr.clients).length.should.eql(0);
 };
 
 
@@ -76,7 +76,7 @@ test['client not supported on platform'] = function*() {
   // mgr.logger = console;
   yield mgr.init();
   
-  mgr.clients.length.should.eql(0);
+  Object.keys(mgr.clients).length.should.eql(0);
 };
 
 
@@ -108,9 +108,9 @@ test['unable to resolve binary'] = function*() {
   // mgr.logger = console;
   yield mgr.init();
   
-  mgr.clients.length.should.eql(1);
+  Object.keys(mgr.clients).length.should.eql(1);
   
-  const client = mgr.clients.pop();
+  const client = _values(mgr.clients).pop();
   
   client.state.available.should.be.false;
   client.state.failReason.should.eql('notFound');
@@ -145,9 +145,9 @@ test['sanity check failed'] = function*() {
   // mgr.logger = console;
   yield mgr.init();
   
-  mgr.clients.length.should.eql(1);
+  Object.keys(mgr.clients).length.should.eql(1);
   
-  const client = mgr.clients.pop();
+  const client = _values(mgr.clients).pop();
   
   client.state.available.should.be.false;
   client.state.failReason.should.eql('sanityCheckFail');
@@ -181,9 +181,9 @@ test['sanity check passed'] = function*() {
   // mgr.logger = console;
   yield mgr.init();
   
-  mgr.clients.length.should.eql(1);
+  Object.keys(mgr.clients).length.should.eql(1);
   
-  const client = mgr.clients.pop();
+  const client = _values(mgr.clients).pop();
   
   client.state.available.should.be.true;
 };
@@ -211,9 +211,9 @@ test['sanity check is mandatory'] = function*() {
   // mgr.logger = console;
   yield mgr.init();
   
-  mgr.clients.length.should.eql(1);
+  Object.keys(mgr.clients).length.should.eql(1);
   
-  const client = mgr.clients.pop();
+  const client = _values(mgr.clients).pop();
   
   client.state.available.should.be.false;
   client.state.failReason.should.eql('sanityCheckFail');
@@ -250,7 +250,7 @@ test['client config returned'] = function*() {
   // mgr.logger = console;
   yield mgr.init();
   
-  const client = mgr.clients.pop();
+  const client = _values(mgr.clients).pop();
   
   client.should.eql(Object.assign({}, config.clients.Maga, {
     id: 'Maga',
@@ -306,7 +306,7 @@ test['search additional folders'] = function*() {
     ]
   });
   
-  const client = mgr.clients.pop();
+  const client = _values(mgr.clients).pop();
   
   client.should.eql(Object.assign({}, config.clients.Rada, {
     id: 'Rada',

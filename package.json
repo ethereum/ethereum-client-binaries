@@ -1,6 +1,6 @@
 {
   "name": "ethereum-client-binaries",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Download Ethereum client binaries for your OS",
   "main": "src/index.js",
   "scripts": {
@@ -32,8 +32,8 @@
     "got": "^6.5.0",
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
+    "lodash.values": "^4.3.0",
     "mkdirp": "^0.5.1",
-    "progress-stream": "^1.2.0",
     "tmp": "0.0.29"
   },
   "devDependencies": {

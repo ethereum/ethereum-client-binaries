@@ -5,15 +5,15 @@ const got = require('got'),
   path = require('path'),
   tmp = require('tmp'),
   mkdirp = require('mkdirp'),
-  // EventEmitter = require('events'),
-  // progress = require('progress-stream'),
   spawn = require('buffered-spawn');
   
 const _ = {
   isEmpty: require('lodash.isempty'),
   get: require('lodash.get'),
+  values: require('lodash.values'),
 };
-  
+
+
 
 const DUMMY_LOGGER = {
   debug: function() {},
@@ -67,9 +67,9 @@ class Manager {
   /**
    * Get info on available clients.
    *
-   * This will return an array, each item having the structure:
+   * This will return an object, each item having the structure:
    *
-   * {
+   * "client name": {
    *  id: "client name"
    *  homepage: "client homepage url"
    *  version: "client version"
@@ -84,7 +84,7 @@ class Manager {
    *  }
    * }
    * 
-   * @return {Array}
+   * @return {Object}
    */
   get clients () {
     return this._clients;
@@ -147,7 +147,7 @@ class Manager {
     
     this._logger.info(`Download binary for ${clientId} ...`);
 
-    const client = (this._clients || []).filter((c) => c.id === clientId).pop();
+    const client = _.get(this._clients, clientId);
     
     const activeCli = _.get(client, `activeCli`),
       downloadCfg = _.get(activeCli, `download`);
@@ -312,21 +312,23 @@ class Manager {
    * @return {Promise}
    */
   _scan (options) {    
-    this._clients = [];
+    this._clients = {};
 
     return this._calculatePossibleClients()
     .then((clients) => {
       this._clients = clients;
       
-      this._logger.info(`${this._clients.length} possible clients.`);          
+      const count = Object.keys(this._clients).length;
+      
+      this._logger.info(`${count} possible clients.`);          
 
-      if (!this._clients.length) {
+      if (_.isEmpty(this._clients)) {
         return;
       }
       
-      this._logger.info(`Verifying status of all ${clients.length} possible clients...`);
+      this._logger.info(`Verifying status of all ${count} possible clients...`);
       
-      return Promise.all(this._clients.map(
+      return Promise.all(_.values(this._clients).map(
         (client) => this._verifyClientStatus(client, options)
       ));
     });
@@ -343,18 +345,17 @@ class Manager {
       // get possible clients
       this._logger.info('Calculating possible clients...');
       
-      const possibleClients = [];
+      const possibleClients = {};
       
       for (let clientName in _.get(this._config, 'clients', {})) {
         let client = this._config.clients[clientName];
         
         if (_.get(client, `platforms.${this._os}.${this._arch}`)) {
-          possibleClients.push(
+          possibleClients[clientName] = 
             Object.assign({}, client, {
               id: clientName,
               activeCli: client.platforms[this._os][this._arch]
-            })
-          );
+            });
         }
       }
       

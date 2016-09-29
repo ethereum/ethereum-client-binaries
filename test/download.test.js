@@ -402,7 +402,7 @@ test['unpacks and verifies ok'] = function*() {
   _get(ret, 'client.state.available', '').should.be.true;
   _get(ret, 'client.activeCli.fullPath', '').should.eql(path.join(downloadFolder, `unpacked`, 'maga2'));
   
-  mgr.clients.pop().should.eql(ret.client);
+  mgr.clients['Maga2'].should.eql(ret.client);
 };
 
 
