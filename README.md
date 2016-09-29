@@ -44,6 +44,7 @@ const config = {
             "download": {
               "url": "https://geth.com/latest.tgz",
               "type": "tar"
+              "bin": "geth-linux-x64"
             },
             "bin": "geth",
             "commands": {
@@ -83,6 +84,8 @@ Every client must specify one or more platforms, each of which must specify
 one or more architectures. Supported platforms are as documented for Node's [process.platform](https://nodejs.org/dist/latest-v6.x/docs/api/process.html#process_process_platform) except that `mac` is used instead of `darwin` and `win` is used instead of `win32`. Supported architectures are as documented for Node's [process.arch](https://nodejs.org/dist/latest-v6.x/docs/api/process.html#process_process_arch).
 
 Each *platform-arch* entry needs to specify a `bin` key which holds the name of the executable on the system, a `download` key which holds info on where the binary can be downloaded from if needed, and a `commands` key which holds information on different kinds of commands that can be run against the binary. 
+
+The `download` key holds the download `url`, the `type` of archive being downloaded, and - optionally - the filename of the binary (`bin`) inside the archive in case it differs from the expected filename of the binary.
 
 The `sanity` command is mandatory and is a way to check a found binary to ensure that is is actually a valid client binary and not something else. In the above config the `sanity` command denotes that running `geth version` should return output containing *both* `Geth` and `1.4.12`.
 

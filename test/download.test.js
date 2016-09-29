@@ -481,3 +481,41 @@ test['unpacked but sanity check failed'] = function*() {
   _get(ret, 'client.state.failReason', '').should.eql('sanityCheckFail');
   _get(ret, 'client.activeCli.fullPath', '').should.eql('');
 };
+
+
+
+test['unpacked and rename'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    download: {
+      url: `${this.archiveTestHost}/maga2-good-rename.zip`,
+      type: 'zip',
+      bin: 'maga2-special'
+    },
+    "bin": "maga2",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
+  });
+  
+  let mgr = new this.Manager({
+    clients: {
+      "Maga2": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "platforms": platforms,
+      }
+    }
+  });
+  
+  // mgr.logger = console;
+  yield mgr.init();
+  
+  let ret = yield mgr.download('Maga2');
+  
+  _get(ret, 'client.state.available', '').should.be.true;
+};

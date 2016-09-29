@@ -258,6 +258,15 @@ class Manager {
       return promise.then(() => {
         this._logger.debug(`Unzipped ${downloadFile} to ${unpackFolder}`);
         
+        // need to rename binary?
+        if (downloadCfg.bin) {
+          fs.symlinkSync(
+            path.join(unpackFolder, downloadCfg.bin),
+            path.join(unpackFolder, activeCli.bin),
+            'file'
+          );
+        }
+        
         return {
           downloadFolder: downloadFolder,
           downloadFile: downloadFile,        
