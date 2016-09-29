@@ -390,7 +390,6 @@ class Manager {
             
       const binPaths = [];
       
-      
       return this._spawn('command', ['-v', binName])
       .then((output) => {
         const systemPath = _.get(output, 'stdout', '').trim();
@@ -407,6 +406,8 @@ class Manager {
         // now let's search additional folders
         if (_.get(options, 'folders.length')) {
           options.folders.forEach((folder) => {
+            this._logger.debug(`Checking for ${client.id} binary in ${folder} ...`);
+
             const fullPath = path.join(folder, binName);
             
             try {
