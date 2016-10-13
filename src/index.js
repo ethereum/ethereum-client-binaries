@@ -260,6 +260,13 @@ class Manager {
         
         // need to rename binary?
         if (downloadCfg.bin) {
+          try {
+            var linkPath = path.join(unpackFolder, activeCli.bin);
+            fs.accessSync(linkPath, fs.R_OK);
+            fs.unlinkSync(linkPath);
+          }
+          catch (e) {}
+
           fs.symlinkSync(
             path.join(unpackFolder, downloadCfg.bin),
             path.join(unpackFolder, activeCli.bin),
