@@ -519,3 +519,59 @@ test['unpacked and rename'] = function*() {
   
   _get(ret, 'client.state.available', '').should.be.true;
 };
+
+
+test['unpacked updated version and symlinked over old version'] = function*(){
+  var downloadOpts = {
+    download: {
+      url: `${this.archiveTestHost}/maga2-good.zip`,
+      type: 'zip',
+      bin: 'maga2'
+    },
+    "bin": "maga",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },
+  };
+
+  let buildMgrOpts = function(scope, downloadOpts){
+    return {
+      clients: {
+        "Maga2": {
+          "platforms": scope.buildPlatformConfig(process.platform, process.arch, downloadOpts),
+        }
+      }
+    }
+  };
+  
+  let mgr = new this.Manager(buildMgrOpts(this, downloadOpts));
+  
+  yield mgr.init();
+  
+  let ret = yield mgr.download('Maga2');
+  const downloadFolder = _get(ret, 'downloadFolder', '');
+
+  // Settings params for 2nd download
+  downloadOpts.download = {
+    url: `${this.archiveTestHost}/maga2-good-rename.zip`,
+    type: 'zip',
+    bin: 'maga2-special'
+  };
+
+  let mgr2 = new this.Manager(buildMgrOpts(this, downloadOpts));
+  
+  yield mgr2.init();
+  
+  let ret2 = yield mgr2.download('Maga2', {downloadFolder: path.join(downloadFolder, '..')});
+
+  _get(ret2, 'client.activeCli.fullPath', '').should.eql(path.join(downloadFolder, 'unpacked', 'maga'));
+
+  // Checking symlink real path
+  const realPathBin = fs.realpathSync(_get(ret2, 'client.activeCli.fullPath', ''));
+  const realPathUpdatedBin = fs.realpathSync(path.join(downloadFolder, 'unpacked', 'maga2-special'));
+
+  realPathBin.should.eql(realPathUpdatedBin);
+}
