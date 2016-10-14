@@ -258,9 +258,9 @@ class Manager {
       return promise.then(() => {
         this._logger.debug(`Unzipped ${downloadFile} to ${unpackFolder}`);
         
-        const linkPath = path.join(unpackFolder, activeCli.bin);
         // need to rename binary?
         if (downloadCfg.bin) {
+          const linkPath = path.join(unpackFolder, activeCli.bin);
           try {
             fs.accessSync(linkPath, fs.R_OK);
             fs.unlinkSync(linkPath);
