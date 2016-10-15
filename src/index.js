@@ -5,6 +5,7 @@ const got = require('got'),
   path = require('path'),
   tmp = require('tmp'),
   mkdirp = require('mkdirp'),
+  unzip = require('unzip'),
   spawn = require('buffered-spawn');
   
 const _ = {
@@ -243,7 +244,19 @@ class Manager {
           case 'zip':
             this._logger.debug(`Using unzip ...`);
 
-            promise = this._spawn('unzip', ['-o', downloadFile, '-d', unpackFolder]);
+            promise = new Promise((resolve, reject) => {
+              try {
+                fs.createReadStream(downloadFile)
+                  .pipe(
+                    unzip.Extract({ path: unpackFolder })
+                    .on('close', resolve)
+                    .on('error', reject)
+                  )
+                  .on('error', reject);
+              } catch (err) {
+                reject(err);
+              }
+            });
             break;
           case 'tar':
             this._logger.debug(`Using tar ...`);
@@ -258,9 +271,14 @@ class Manager {
       return promise.then(() => {
         this._logger.debug(`Unzipped ${downloadFile} to ${unpackFolder}`);
         
+        const linkPath = path.join(unpackFolder, activeCli.bin);
+        
+        let realPath = linkPath;
+                
         // need to rename binary?
         if (downloadCfg.bin) {
-          const linkPath = path.join(unpackFolder, activeCli.bin);
+          realPath = path.join(unpackFolder, downloadCfg.bin);
+          
           try {
             fs.accessSync(linkPath, fs.R_OK);
             fs.unlinkSync(linkPath);
@@ -268,12 +286,17 @@ class Manager {
           catch (e) {}
 
           fs.symlinkSync(
-            path.join(unpackFolder, downloadCfg.bin),
+            realPath,
             linkPath,
             'file'
           );
         }
         
+        // make binary executable
+        try {
+          fs.chmodSync(realPath, '755');
+        } catch (e) {}
+
         return {
           downloadFolder: downloadFolder,
           downloadFile: downloadFile,        
