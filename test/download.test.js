@@ -528,7 +528,7 @@ test['unpacked updated version and symlinked over old version'] = function*(){
       type: 'zip',
       bin: 'maga2'
     },
-    "bin": "maga",
+    "bin": "maga3",
     "commands": {
       "sanity": {
         "args": ['test'],
@@ -548,11 +548,15 @@ test['unpacked updated version and symlinked over old version'] = function*(){
   };
   
   let mgr = new this.Manager(buildMgrOpts(this, downloadOpts));
+  // mgr.logger = console;
   
   yield mgr.init();
   
   let ret = yield mgr.download('Maga2');
+
   const downloadFolder = _get(ret, 'downloadFolder', '');
+  
+  _get(ret, 'client.activeCli.fullPath', '').should.eql(path.join(downloadFolder, 'unpacked', 'maga3'));
 
   // Settings params for 2nd download
   downloadOpts.download = {
@@ -562,12 +566,13 @@ test['unpacked updated version and symlinked over old version'] = function*(){
   };
 
   let mgr2 = new this.Manager(buildMgrOpts(this, downloadOpts));
-  
+  // mgr2.logger = console;
+
   yield mgr2.init();
   
   let ret2 = yield mgr2.download('Maga2', {downloadFolder: path.join(downloadFolder, '..')});
 
-  _get(ret2, 'client.activeCli.fullPath', '').should.eql(path.join(downloadFolder, 'unpacked', 'maga'));
+  _get(ret2, 'client.activeCli.fullPath', '').should.eql(path.join(downloadFolder, 'unpacked', 'maga3'));
 
   // Checking symlink real path
   const realPathBin = fs.realpathSync(_get(ret2, 'client.activeCli.fullPath', ''));

@@ -283,7 +283,9 @@ class Manager {
             fs.accessSync(linkPath, fs.R_OK);
             fs.unlinkSync(linkPath);
           }
-          catch (e) {}
+          catch (e) {
+            this._logger.warn(e);
+          }
 
           fs.symlinkSync(
             realPath,
@@ -295,7 +297,9 @@ class Manager {
         // make binary executable
         try {
           fs.chmodSync(realPath, '755');
-        } catch (e) {}
+        } catch (e) {
+          this._logger.warn(e);
+        }
 
         return {
           downloadFolder: downloadFolder,
