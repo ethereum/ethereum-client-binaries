@@ -1,6 +1,6 @@
 {
   "name": "ethereum-client-binaries",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "Download Ethereum client binaries for your OS",
   "main": "src/index.js",
   "scripts": {
@@ -45,6 +45,7 @@
     "istanbul": "^0.4.5",
     "live-server": "^1.1.0",
     "lodash.frompairs": "^4.0.1",
+    "md5-file": "^3.1.1",
     "mocha": "^3.0.2",
     "sinon": "^1.17.6",
     "sinon-chai": "^2.8.0"

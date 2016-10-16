@@ -2,6 +2,7 @@
 
 const _get = require('lodash.get'),
   fs = require('fs'),
+  md5File = require('md5-file'),
   path = require('path');
 
 const test = require('./_base')(module);
@@ -484,7 +485,7 @@ test['unpacked but sanity check failed'] = function*() {
 
 
 
-test['unpacked and rename'] = function*() {
+test['unpacked and set to required name'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     download: {
       url: `${this.archiveTestHost}/maga2-good-rename.zip`,
@@ -521,7 +522,7 @@ test['unpacked and rename'] = function*() {
 };
 
 
-test['unpacked updated version and symlinked over old version'] = function*(){
+test['unpacked updated version and copied over old version'] = function*(){
   var downloadOpts = {
     download: {
       url: `${this.archiveTestHost}/maga2-good.zip`,
@@ -574,9 +575,9 @@ test['unpacked updated version and symlinked over old version'] = function*(){
 
   _get(ret2, 'client.activeCli.fullPath', '').should.eql(path.join(downloadFolder, 'unpacked', 'maga3'));
 
-  // Checking symlink real path
-  const realPathBin = fs.realpathSync(_get(ret2, 'client.activeCli.fullPath', ''));
-  const realPathUpdatedBin = fs.realpathSync(path.join(downloadFolder, 'unpacked', 'maga2-special'));
-
-  realPathBin.should.eql(realPathUpdatedBin);
+  // check that maga3 === maga2-special
+  const hash1 = md5File.sync(path.join(downloadFolder, 'unpacked', 'maga3'));
+  const hash2 = md5File.sync(path.join(downloadFolder, 'unpacked', 'maga2-special'));
+  
+  hash1.should.eql(hash2);
 }

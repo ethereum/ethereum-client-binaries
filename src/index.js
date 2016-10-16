@@ -15,6 +15,26 @@ const _ = {
 };
 
 
+function copyFile(src, dst) {
+  return new Promise((resolve, reject) => {
+    var rd = fs.createReadStream(src);
+    
+    rd.on("error", (err) => {
+      reject(err);
+    });    
+    
+    var wr = fs.createWriteStream(dst);
+    wr.on("error", (err) => {
+      reject(err);
+    });
+    wr.on("close", (ex) => {
+      resolve();
+    });
+    
+    rd.pipe(wr);
+  });
+}
+
 
 const DUMMY_LOGGER = {
   debug: function() {},
@@ -273,30 +293,26 @@ class Manager {
         
         const linkPath = path.join(unpackFolder, activeCli.bin);
         
-        let realPath = linkPath;
-                
         // need to rename binary?
         if (downloadCfg.bin) {
-          realPath = path.join(unpackFolder, downloadCfg.bin);
+          let realPath = path.join(unpackFolder, downloadCfg.bin);
           
           try {
             fs.accessSync(linkPath, fs.R_OK);
             fs.unlinkSync(linkPath);
-          }
-          catch (e) {
+          } catch (e) {
             this._logger.warn(e);
           }
 
-          fs.symlinkSync(
-            realPath,
-            linkPath,
-            'file'
-          );
+          return copyFile(realPath, linkPath).then(() => linkPath)
+        } else {
+          return Promise.resolve(linkPath);
         }
-        
+      })
+      .then((binPath) => {
         // make binary executable
         try {
-          fs.chmodSync(realPath, '755');
+          fs.chmodSync(binPath, '755');
         } catch (e) {
           this._logger.warn(e);
         }
