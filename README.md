@@ -14,7 +14,7 @@ download.
 
 Features:
 * Configurable client types (Geth, Eth, Parity, etc)
-* Configurable *sanity* checks
+* Configurable *sanity* checks and SHA256 hash check
 * Can scan and download to specific folders
 * Logging can be toggled on/off at runtime
 * Can be integrated into Electron.js apps
@@ -43,8 +43,9 @@ const config = {
           "x64": {
             "download": {
               "url": "https://geth.com/latest.tgz",
-              "type": "tar"
-              "bin": "geth-linux-x64"
+              "type": "tar",
+              "bin": "geth-linux-x64",
+              "sha256": "8359e8e647b168dbd053ec56438ab4cea8d76bd5153d681d001c5ce1a390401c",
             },
             "bin": "geth",
             "commands": {
@@ -85,7 +86,8 @@ one or more architectures. Supported platforms are as documented for Node's [pro
 
 Each *platform-arch* entry needs to specify a `bin` key which holds the name of the executable on the system, a `download` key which holds info on where the binary can be downloaded from if needed, and a `commands` key which holds information on different kinds of commands that can be run against the binary. 
 
-The `download` key holds the download `url`, the `type` of archive being downloaded, and - optionally - the filename of the binary (`bin`) inside the archive in case it differs from the expected filename of the binary.
+The `download` key holds the download `url`, the `type` of archive being downloaded, and - optionally - the filename of the binary (`bin`) inside the archive in case it differs from the expected filename of the binary. As a security measure, a `sha256` key equalling the SHA256 hash calculation of the downloadable file may be provided, in which the downloaded file's hash is tested 
+for equality with this value.
 
 The `sanity` command is mandatory and is a way to check a found binary to ensure that is is actually a valid client binary and not something else. In the above config the `sanity` command denotes that running `geth version` should return output containing *both* `Geth` and `1.4.12`.
 
