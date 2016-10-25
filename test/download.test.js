@@ -301,6 +301,47 @@ test['unsupported archive type'] = function*() {
 
 
 
+test['hash mismatch'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    download: {
+      url: `${this.archiveTestHost}/maga2-good.zip`,
+      type: 'blah',
+      sha256: 'blahblahblah'
+    },
+    "bin": "maga2",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
+  });
+  
+  let mgr = new this.Manager({
+    clients: {
+      "Maga2": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "platforms": platforms,
+      }
+    }
+  });
+  
+  // mgr.logger = console;
+  yield mgr.init();
+  
+  try {
+    yield mgr.download('Maga2');
+    throw -1;
+  } catch (err) {
+    err.message.should.contain(`Hash mismatch: blahblahblah`);
+  }
+};
+
+
+
 
 
 test['custom unpack handler'] = {
@@ -581,3 +622,44 @@ test['unpacked updated version and copied over old version'] = function*(){
   
   hash1.should.eql(hash2);
 }
+
+
+
+
+test['hash match'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    download: {
+      url: `${this.archiveTestHost}/maga2-good.zip`,
+      type: 'zip',
+      sha256: 'e7781ccd95e2db9246dbe8c1deaf9238ab4428a713d08080689834fd68a25652'
+    },
+    "bin": "maga2",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
+  });
+  
+  let mgr = new this.Manager({
+    clients: {
+      "Maga2": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "platforms": platforms,
+      }
+    }
+  });
+  
+  // mgr.logger = console;
+  yield mgr.init();
+  
+  let ret = yield mgr.download('Maga2');
+  
+  mgr.clients['Maga2'].should.eql(ret.client);
+};
+
+

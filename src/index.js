@@ -2,6 +2,7 @@
 
 const got = require('got'),
   fs = require('fs'),
+  crypto = require('crypto'),
   path = require('path'),
   tmp = require('tmp'),
   mkdirp = require('mkdirp'),
@@ -34,6 +35,24 @@ function copyFile(src, dst) {
     rd.pipe(wr);
   });
 }
+
+
+function sha256(filePath) {
+  return new Promise((resolve, reject) => {
+    const shasum = crypto.createHash('sha256');
+
+    const stream = fs.ReadStream(filePath);
+    
+    stream.on('data', (d) => shasum.update(d));
+    
+    stream.on('end', () => {
+      resolve(shasum.digest('hex'));
+    });    
+    
+    stream.on('error', reject);    
+  });
+}
+
 
 
 const DUMMY_LOGGER = {
@@ -244,7 +263,27 @@ class Manager {
     .then((dInfo) => {
       const downloadFolder = dInfo.downloadFolder,
         downloadFile = dInfo.downloadFile;
+
+      // test sha hash
+      const expectedHash = _.get(downloadCfg, 'sha256');
       
+      if (expectedHash) {
+        return sha256(dInfo.downloadFile)
+          .then((hash) => {
+            if (expectedHash !== hash) {
+              throw new Error(`Hash mismatch: ${expectedHash}`);
+            }
+            
+            return dInfo;
+          });
+      } else {
+        return dInfo;
+      }
+    })
+    .then((dInfo) => {
+      const downloadFolder = dInfo.downloadFolder,
+        downloadFile = dInfo.downloadFile;
+
       const unpackFolder = path.join(downloadFolder, 'unpacked');
       
       this._logger.debug(`Ensure unpack folder ${unpackFolder} exists ...`);
