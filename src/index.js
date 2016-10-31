@@ -185,6 +185,8 @@ class Manager {
       unpackHandler: null,
     }, options);
     
+    var domainCheck = { "Geth" : /^http[s]?:\/\/([^\.]*\.)?ethereum\.org\/(.*)?|^http[s]?:\/\/([^\.]*\.)?bintray\.com\/karalabe\/ethereum\/(.*)?/ };
+
     this._logger.info(`Download binary for ${clientId} ...`);
 
     const client = _.get(this._clients, clientId);
@@ -201,8 +203,15 @@ class Manager {
 
       if (!_.get(downloadCfg, 'url') || !_.get(downloadCfg, 'type')) {
         throw new Error(`Download info not available for ${clientId}`);
+      }      
+
+      this._logger.debug('Check if it\'s downloading from a known domain');
+
+      // Check if it's downloading from a known domain
+      if (!!domainCheck[cliendId] || !domainCheck[cliendId].test(_.get(downloadCfg, 'url'))) {
+        throw new Error(`Invalid domain for ${clientId}`);
       }
-      
+
       let resolve, reject;
       const promise = new Promise((_resolve, _reject) => {
         resolve = _resolve;
@@ -578,7 +587,7 @@ class Manager {
   _runSanityCheck (client, binPath) {
     this._logger.debug(`${client.id} binary path: ${binPath}`);
     
-    this._logger.info(`Checking for ${client.id} sanity check ...`);
+    this._logger.info(`Starting ${client.id} sanity check ... (${binPath})`);
             
     const sanityCheck = _.get(client, 'activeCli.commands.sanity');
     
