@@ -176,6 +176,7 @@ class Manager {
    * @param {Object} [options] Options.
    * @param {Object} [options.downloadFolder] Folder to download client to, and to unzip it in.
    * @param {Function} [options.unpackHandler] Custom download archive unpack handling function.
+   * @param {RegExp} [options.urlRegex] Regex to check the download URL against (this is a security measure).
    *
    * @return {Promise} 
    */
@@ -183,6 +184,7 @@ class Manager {
     options = Object.assign({
       downloadFolder: null,
       unpackHandler: null,
+      urlRegex: null,
     }, options);
     
     this._logger.info(`Download binary for ${clientId} ...`);
@@ -201,6 +203,14 @@ class Manager {
 
       if (!_.get(downloadCfg, 'url') || !_.get(downloadCfg, 'type')) {
         throw new Error(`Download info not available for ${clientId}`);
+      }
+      
+      if (options.urlRegex) {
+        this._logger.debug('Checking download URL against regex ...');
+        
+        if (!options.urlRegex.test(downloadCfg.url)) {
+          throw new Error(`Download URL failed regex check`);
+        }
       }
       
       let resolve, reject;
@@ -613,28 +623,23 @@ class Manager {
     })
     .catch((err) => {
       this._logger.error(`Sanity check failed for ${client.id}`, err);
-            
+
       throw err;
-    });    
+    });
   }
-  
-  
+
+
   /**
    * @return {Promise} Resolves to { stdout, stderr } object
    */
   _spawn(cmd, args) {
     args = args || [];
-    
+
     this._logger.debug(`Exec: "${cmd} ${args.join(' ')}"`);
-    
+
     return spawn(cmd, args);
   }
 }
 
 
 exports.Manager = Manager;
-
-
-
-
-

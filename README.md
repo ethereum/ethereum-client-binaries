@@ -14,7 +14,7 @@ download.
 
 Features:
 * Configurable client types (Geth, Eth, Parity, etc)
-* Configurable *sanity* checks and SHA256 hash check
+* Security: Binary *sanity* checks, URL regex checks, SHA256 hash checks
 * Can scan and download to specific folders
 * Logging can be toggled on/off at runtime
 * Can be integrated into Electron.js apps
@@ -230,19 +230,40 @@ If download and unpacking is successful the returned object will look something 
 {
   downloadFolder: '/path/to/my/folder',
   downloadFile: '/path/to/my/folder/archive.tgz',
-  unpackFolder: '/path/to/my/folder/unpacked',  
+  unpackFolder: '/path/to/my/folder/unpacked',
 }
 ```
 
 The next time you initialise the manager you can pass in `/path/to/my/folder/unpacked` as an additional folder to scan for binaries in:
 
 ```js
-mgr.init({ 
+mgr.init({
   folders: [
     `/path/to/my/folder/unpacked`
   ]
 });
 ```
+
+### URL regular expression (regex) check
+
+Even though you can check the SHA 256 hash of the downloaded package (as shown 
+  above) you may additionally wish to ensure that the download URL points to 
+a domain you control. This is important if for example you are obtaining the 
+initial JSON config object from a remote server.
+
+This is how you use it:
+
+```js
+mgr.download("Geth", {
+  urlRegex: /^https:\/\/ethereum.org\/.+$/
+})
+.then(...)
+.catch(...)
+```
+
+The above regex states that ONLY download URLs beginning with
+`https://ethereum.org/` are valid and allowed.
+
 
 ### Logging
 
@@ -278,4 +299,3 @@ Contributions welcome - see [CONTRIBUTING.md](CONTRIBUTING.md)
 ## License
 
 MIT - see [LICENSE.md](LICENSE.md)
-

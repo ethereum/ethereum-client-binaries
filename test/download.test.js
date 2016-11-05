@@ -261,6 +261,10 @@ test['download fails'] = function*() {
 
 
 
+
+
+
+
 test['unsupported archive type'] = function*() {
   const platforms = this.buildPlatformConfig(process.platform, process.arch, {
     download: {
@@ -341,6 +345,46 @@ test['hash mismatch'] = function*() {
 };
 
 
+
+test['url regex mismatch'] = function*() {
+  const platforms = this.buildPlatformConfig(process.platform, process.arch, {
+    download: {
+      url: `${this.archiveTestHost}/maga2-good.zip`,
+      type: 'zip'
+    },
+    "bin": "maga2",
+    "commands": {
+      "sanity": {
+        "args": ['test'],
+        "output": [ "good:test" ]
+      }
+    },               
+  });
+  
+  let mgr = new this.Manager({
+    clients: {
+      "Maga2": {
+        "homepage": "http://badgerbadgerbadger.com",
+        "version": "1.0.0",
+        "foo": "bar",
+        "versionNotes": "http://badgerbadgerbadger.com",
+        "platforms": platforms,
+      }
+    }
+  });
+  
+  // mgr.logger = console;
+  yield mgr.init();
+  
+  try {
+    yield mgr.download('Maga2', {
+      urlRegex: /blahblah/i
+    });
+    throw -1;
+  } catch (err) {
+    err.message.should.contain(`Download URL failed regex check`);
+  }
+};
 
 
 
@@ -435,7 +479,9 @@ test['unpacks and verifies ok'] = function*() {
   // mgr.logger = console;
   yield mgr.init();
   
-  let ret = yield mgr.download('Maga2');
+  let ret = yield mgr.download('Maga2', {
+    urlRegex: /localhost/
+  });
   
   const downloadFolder = _get(ret, 'downloadFolder', '');
   _get(ret, 'downloadFile', '').should.eql(path.join(downloadFolder, `archive.zip`));
@@ -641,7 +687,7 @@ test['hash match'] = function*() {
       }
     },               
   });
-  
+
   let mgr = new this.Manager({
     clients: {
       "Maga2": {
@@ -653,13 +699,11 @@ test['hash match'] = function*() {
       }
     }
   });
-  
+
   // mgr.logger = console;
   yield mgr.init();
-  
+
   let ret = yield mgr.download('Maga2');
-  
+
   mgr.clients['Maga2'].should.eql(ret.client);
 };
-
-
