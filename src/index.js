@@ -37,22 +37,21 @@ function copyFile(src, dst) {
 }
 
 
-function sha256(filePath) {
+function checksum(filePath, algorithm) {
   return new Promise((resolve, reject) => {
-    const shasum = crypto.createHash('sha256');
+    const checksum = crypto.createHash(algorithm);
 
     const stream = fs.ReadStream(filePath);
 
-    stream.on('data', (d) => shasum.update(d));
+    stream.on('data', (d) => checksum.update(d));
 
     stream.on('end', () => {
-      resolve(shasum.digest('hex'));
+      resolve(checksum.digest('hex'));
     });
 
     stream.on('error', reject);
   });
 }
-
 
 
 const DUMMY_LOGGER = {
@@ -274,16 +273,26 @@ class Manager {
       const downloadFolder = dInfo.downloadFolder,
         downloadFile = dInfo.downloadFile;
 
-      // test sha hash
-      const expectedHash = _.get(downloadCfg, 'sha256');
+      // test checksum
+      let value, algorithm, expectedHash;
 
-      if (expectedHash) {
-        return sha256(dInfo.downloadFile)
+      if (value = _.get(downloadCfg, 'sha256')) {
+          expectedHash = value;
+          algorithm = 'sha256';
+      } else if (value = _.get(downloadCfg, 'md5')) {
+          expectedHash = value;
+          algorithm = 'md5';
+      }
+
+      if (algorithm) {
+        return checksum(dInfo.downloadFile, algorithm)
           .then((hash) => {
+              this._logger.error(algorithm)
+                  this._logger.error(hash)
+                      this._logger.error(expectedHash)
             if (expectedHash !== hash) {
               throw new Error(`Hash mismatch: ${expectedHash}`);
             }
-
             return dInfo;
           });
       } else {
