@@ -347,8 +347,7 @@ class Manager {
           let realPath = path.join(unpackFolder, downloadCfg.bin);
 
           try {
-            fs.accessSync(linkPath, fs.R_OK);
-            fs.unlinkSync(linkPath);
+            fs.accessSync(realPath, fs.R_OK);
           } catch (e) {
             this._logger.warn(e);
           }
