@@ -276,12 +276,12 @@ class Manager {
       // test checksum
       let value, algorithm, expectedHash;
 
-      if (value = _.get(downloadCfg, 'sha256')) {
-          expectedHash = value;
-          algorithm = 'sha256';
-      } else if (value = _.get(downloadCfg, 'md5')) {
+      if (value = _.get(downloadCfg, 'md5')) {
           expectedHash = value;
           algorithm = 'md5';
+      } else if (value = _.get(downloadCfg, 'sha256')) {
+          expectedHash = value;
+          algorithm = 'sha256';
       }
 
       if (algorithm) {
