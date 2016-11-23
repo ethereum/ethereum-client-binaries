@@ -350,7 +350,8 @@ class Manager {
             fs.accessSync(linkPath, fs.R_OK);
             fs.unlinkSync(linkPath);
           } catch (e) {
-            this._logger.warn(e);
+            if (e.code !== 'ENOENT')
+              this._logger.warn(e);
           }
 
           return copyFile(realPath, linkPath).then(() => linkPath)
