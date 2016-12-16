@@ -288,7 +288,7 @@ class Manager {
         return checksum(dInfo.downloadFile, algorithm)
           .then((hash) => {
             if (expectedHash !== hash) {
-              throw new Error(`Hash mismatch: ${expectedHash}`);
+              throw new Error(`Hash mismatch (using ${algorithm}): expected ${expectedHash}; got ${hash}`);
             }
             return dInfo;
           });
