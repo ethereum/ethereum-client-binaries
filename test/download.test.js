@@ -340,7 +340,7 @@ test['hash sha256 mismatch'] = function*() {
     yield mgr.download('Maga2');
     throw -1;
   } catch (err) {
-    err.message.should.contain(`Hash mismatch: blahblahblah`);
+    err.message.should.contain(`Hash mismatch (using sha256): expected blahblahblah; got e7781ccd95e2db9246dbe8c1deaf9238ab4428a713d08080689834fd68a25652`);
   }
 };
 
@@ -381,7 +381,7 @@ test['hash md5 mismatch'] = function*() {
     yield mgr.download('Maga2');
     throw -1;
   } catch (err) {
-    err.message.should.contain(`Hash mismatch: blahblahblah`);
+    err.message.should.contain(`Hash mismatch (using md5): expected blahblahblah; got dff641865ffb9b44d53f1f9def74f2e6`);
   }
 };
 
