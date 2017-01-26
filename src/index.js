@@ -510,8 +510,7 @@ class Manager {
       if (process.platform === 'win32') {
           command = 'where';
       } else {
-          command = 'command';
-          args.push('-v');
+          command = 'which';
       }
       args.push(binName);
 
