@@ -34,8 +34,9 @@
     "lodash.isempty": "^4.4.0",
     "lodash.values": "^4.3.0",
     "mkdirp": "^0.5.1",
-    "tmp": "0.0.29",
-    "node-unzip-2": "^0.2.1"
+    "node-unzip-2": "^0.2.1",
+    "semver": "^5.3.0",
+    "tmp": "0.0.29"
   },
   "devDependencies": {
     "bluebird": "^3.4.6",

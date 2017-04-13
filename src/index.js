@@ -7,6 +7,7 @@ const got = require('got'),
   tmp = require('tmp'),
   mkdirp = require('mkdirp'),
   unzip = require('node-unzip-2'),
+  semver = require('semver'),
   spawn = require('buffered-spawn');
 
 const _ = {
@@ -540,7 +541,7 @@ class Manager {
 
               this._logger.debug(`Got optional folder binary for ${client.id}: ${fullPath}`);
 
-              binPaths.push(fullPath);
+              binPaths.unshift(fullPath);
             } catch (err) {
               /* do nothing */
             }
@@ -621,22 +622,23 @@ class Manager {
       return this._spawn(binPath, sanityCheck.args);
     })
     .then((output) => {
-      const haystack = output.stdout + output.stderr;
+      this._logger.debug(`Sanity check output: ${output.stdout + output.stderr}`);
 
-      this._logger.debug(`Sanity check output: ${haystack}`);
+      try {
+        var version = output.stdout.match(/\d+\.\d+\.\d+/)[0];
+      } catch (err) {
+        throw new Error(`Unable to find semantic version >= "${client.version}" in "${binPath} ${sanityCheck.args}"'s' output`);
+      }
 
-      const needles = sanityCheck.output || [];
-
-      for (let needle of needles) {
-        if (0 > haystack.indexOf(needle)) {
-          throw new Error(`Unable to find "${needle}" in ${client.id} output`);
-        }
+      if (version && semver.lt(version, client.version)) {
+        return;
       }
 
       this._logger.debug(`Sanity check passed for ${binPath}`);
 
       // set it!
       client.activeCli.fullPath = binPath;
+      client.activeCli.version = version;
     })
     .catch((err) => {
       this._logger.error(`Sanity check failed for ${client.id}`, err);
