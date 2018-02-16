@@ -1,6 +1,6 @@
 {
   "name": "ethereum-client-binaries",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "Download Ethereum client binaries for your OS",
   "main": "src/index.js",
   "scripts": {
@@ -35,7 +35,7 @@
     "lodash.values": "^4.3.0",
     "mkdirp": "^0.5.1",
     "tmp": "0.0.29",
-    "node-unzip-2": "^0.2.1"
+    "unzip": "github:glebdmitriew/node-unzip-2"
   },
   "devDependencies": {
     "bluebird": "^3.4.6",
