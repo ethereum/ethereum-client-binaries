@@ -6,7 +6,7 @@ const got = require('got'),
   path = require('path'),
   tmp = require('tmp'),
   mkdirp = require('mkdirp'),
-  unzip = require('unzip'),
+  unzip = require('node-unzip-2'),
   spawn = require('buffered-spawn');
 
 const _ = {
