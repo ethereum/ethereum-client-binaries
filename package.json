@@ -34,8 +34,8 @@
     "lodash.isempty": "^4.4.0",
     "lodash.values": "^4.3.0",
     "mkdirp": "^0.5.1",
-    "tmp": "0.0.29",
-    "unzip": "github:glebdmitriew/node-unzip-2"
+    "node-unzip-2": "^0.2.7",
+    "tmp": "0.0.29"
   },
   "devDependencies": {
     "bluebird": "^3.4.6",
