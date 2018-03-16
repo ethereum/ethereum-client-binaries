@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hiddentao/ethereum-client-binaries.git"
+    "url": "git+https://github.com/ethereum/ethereum-client-binaries.git"
   },
   "keywords": [
     "ethereum",
@@ -24,9 +24,9 @@
   "author": "Ramesh Nair <ram@hiddentao.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/hiddentao/ethereum-client-binaries/issues"
+    "url": "https://github.com/ethereum/ethereum-client-binaries/issues"
   },
-  "homepage": "https://github.com/hiddentao/ethereum-client-binaries#readme",
+  "homepage": "https://github.com/ethereum/ethereum-client-binaries#readme",
   "dependencies": {
     "buffered-spawn": "^3.3.2",
     "got": "^6.5.0",
