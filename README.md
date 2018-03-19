@@ -1,6 +1,6 @@
 # ethereum-client-binaries
 
-[![Build Status](https://secure.travis-ci.org/ethereum/ethereum-client-binaries.png?branch=master)](http://travis-ci.org/hiddentao/ethereum-client-binaries) [![NPM module](https://badge.fury.io/js/ethereum-client-binaries.png)](https://badge.fury.io/js/ethereum-client-binaries) [![Twitter URL](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Follow&maxAge=2592000)](https://twitter.com/hiddentao)
+[![Build Status](https://secure.travis-ci.org/ethereum/ethereum-client-binaries.svg?branch=master)](http://travis-ci.org/ethereum/ethereum-client-binaries) [![NPM module](https://badge.fury.io/js/ethereum-client-binaries.svg)](https://badge.fury.io/js/ethereum-client-binaries) 
 
 Download Ethereum client binaries for your OS.
 
@@ -100,7 +100,7 @@ const Manager = require('ethereum-client-binaries').Manager;
 const mgr =  new Manager(config);
 ```
 
-**Note:** If no config is provided then the default config ([src/config.json](https://github.com/hiddentao/ethereum-client-binaries/blob/master/src/config.json)) gets used.
+**Note:** If no config is provided then the default config ([src/config.json](https://github.com/ethereum/ethereum-client-binaries/blob/master/src/config.json)) gets used.
 
 ### Scanning for binaries
 
