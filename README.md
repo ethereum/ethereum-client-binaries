@@ -1,3 +1,7 @@
+# Archival Notice
+This repository is an archive. Please see https://ethereum.org/ and specifically the https://ethereum.org/en/developers/docs/nodes-and-clients/ for actual information on clients.
+
+# Original README.md
 # ethereum-client-binaries
 
 [![Build Status](https://secure.travis-ci.org/ethereum/ethereum-client-binaries.svg?branch=master)](http://travis-ci.org/ethereum/ethereum-client-binaries) [![NPM module](https://badge.fury.io/js/ethereum-client-binaries.svg)](https://badge.fury.io/js/ethereum-client-binaries) 
